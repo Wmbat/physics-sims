@@ -1,0 +1,5 @@
+sph
+
+# Testscript output directory (can be symlink).
+#
+test-sph

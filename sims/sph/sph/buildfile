@@ -1,0 +1,19 @@
+libs =
+import libs += libphyseng%lib{physeng}
+import libs += Vulkan-Hpp%lib{Vulkan-Hpp}
+import libs += tl-expected%lib{tl-expected}
+
+exe{sph}: {hxx ixx txx cxx}{** --version} hxx{version} $libs
+
+hxx{version}: in{version} $src_root/manifest
+
+cxx.poptions =+ "-I$out_root" "-I$src_root"
+
+# For pre-releases use the complete version to make sure they cannot be used
+# in place of another pre-release or the final version. See the version module
+# for details on the version.* variable values.
+#
+if $version.pre_release
+  exe{sph}: bin.lib.version = "-$version.project_id"
+else
+  exe{sph}: bin.lib.version = "-$version.major.$version.minor"
