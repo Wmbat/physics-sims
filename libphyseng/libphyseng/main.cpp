@@ -4,15 +4,19 @@
 #include <range/v3/view/span.hpp>
 #include <range/v3/view/tail.hpp>
 
+#include <ranges>
+
 auto main(int argc, char *argv[]) -> int
 {
-	// clang-format off
+	namespace stdr = std::ranges;
 
-	auto const args = ranges::span{argv, argc} 
-					| ranges::views::tail 
-					| ranges::to<std::vector<std::string_view>>;
+	auto const args = ranges::span{argv, argc} | ranges::to<std::vector<std::string_view>>;
 
-	// clang-format on
+	// If we have no arguments, there is something wrong
+	if (stdr::empty(args))
+	{
+		return -1;
+	}
 
 	physeng_main(args);
 

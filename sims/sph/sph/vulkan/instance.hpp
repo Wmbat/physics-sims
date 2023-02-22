@@ -2,14 +2,12 @@
 
 #include <sph/vulkan/details/vulkan.hpp>
 
+#include <spdlog/logger.h>
+
 #include <tl/expected.hpp>
 
 namespace vulkan
 {
-	struct instance_create_info
-	{
-	};
-
 	enum struct instance_error
 	{
 
@@ -18,7 +16,7 @@ namespace vulkan
 	class instance
 	{
 	public:
-		static auto make(const instance_create_info& info)
+		static auto make(std::string_view app_name, spdlog::logger& logger)
 			-> tl::expected<instance, instance_error>;
 
 		/**

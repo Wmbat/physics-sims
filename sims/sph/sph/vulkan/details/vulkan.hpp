@@ -27,8 +27,21 @@
 
 namespace vulkan
 {
+#if defined(NDEBUG)
+	static constexpr bool should_enable_validation_layers = false;
+#else
+	static constexpr bool should_enable_validation_layers = true;
+#endif
+
 	constexpr auto to_vulkan_version(const physeng::semantic_version& version) -> std::uint32_t
 	{
 		return VK_MAKE_API_VERSION(0, version.major, version.minor, version.patch);
+	}
+
+	constexpr auto from_vulkan_version(std::uint32_t version) -> physeng::semantic_version
+	{
+		return {.major = VK_API_VERSION_MAJOR(version),
+				.minor = VK_API_VERSION_MINOR(version),
+				.patch = VK_API_VERSION_PATCH(version)};
 	}
 } // namespace vulkan

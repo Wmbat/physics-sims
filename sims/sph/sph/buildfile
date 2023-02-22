@@ -2,6 +2,7 @@ libs =
 import libs += libphyseng%lib{physeng}
 import libs += Vulkan-Hpp%lib{Vulkan-Hpp}
 import libs += tl-expected%lib{tl-expected}
+import libs += spdlog%lib{spdlog}
 
 exe{sph}: {hxx ixx txx cxx}{** --version} hxx{version} $libs
 
