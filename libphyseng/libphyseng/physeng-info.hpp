@@ -22,6 +22,9 @@
 
 namespace physeng
 {
+	/**
+	 * @brief Gives access to the current semantic version of the engine
+	 */
 	inline constexpr auto get_engine_version() -> semantic_version
 	{
 		return {.major = LIBPHYSENG_VERSION_MAJOR,
@@ -29,6 +32,9 @@ namespace physeng
 				.patch = LIBPHYSENG_VERSION_PATCH};
 	}
 
+	/**
+	 * @brief Gives access to the name of the physics engine
+	 */
 	inline constexpr auto get_engine_name() -> std::string_view
 	{
 		return std::string_view{"physeng"};

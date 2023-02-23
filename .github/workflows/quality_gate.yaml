@@ -1,0 +1,41 @@
+name: quality gate
+
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Job for building on Ubuntu
+  Ubuntu:
+    name: ${{matrix.config.name}}
+    runs-on: ${{matrix.config.os}}
+    strategy:
+      matrix:
+        config:
+          - name: Ubuntu gcc Debug
+            os: ubuntu-latest
+            config_file: gcc.debug.build
+          - name: Ubuntu clang Debug
+            os: ubuntu-latest
+            config_file: clang.debug.build
+          - name: Ubuntu gcc Release
+            os: ubuntu-latest
+            config_file: gcc.release.build
+          - name: Ubuntu clang Release
+            os: ubuntu-latest
+            config_file: clang.release.build
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: build2/setup-build2-github-action@v2
+        with:
+          build2-version: staged
+      - name: Install dependencies
+        run: sudo apt-get update
+      - name: Configure
+        run: bdep init -C @cc cc config.config.load=build-config/${{matrix.config.config_file}}
+      - name: Build
+        run: b update test -V

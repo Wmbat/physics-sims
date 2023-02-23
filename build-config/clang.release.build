@@ -1,0 +1,5 @@
+config.version = 1
+
+config.cc.coptions = -O3 -DNDEBUG
+config.c = clang
+config.cxx = clang++

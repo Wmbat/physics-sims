@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include <span>
 #include <string_view>
 
 /**
+ * @brief The main entry point of the application using physeng. It **must** be implemented by users
+ * of the engine
  *
+ * @param[in] args The command line argument passed when launching the application
  */
 extern void physeng_main(std::span<std::string_view const> args);
-

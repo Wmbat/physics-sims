@@ -24,11 +24,15 @@
 
 namespace physeng
 {
+	/**
+	 * @brief Represent a format convention for determining a version encoded using a major, minor
+	 * and patch
+	 */
 	struct semantic_version
 	{
-		std::uint32_t major;
-		std::uint32_t minor;
-		std::uint32_t patch;
+		std::uint32_t major; //< The major number of the version
+		std::uint32_t minor; //< The minor version of the number
+		std::uint32_t patch; //< The patch version of the number
 	};
 } // namespace physeng
 

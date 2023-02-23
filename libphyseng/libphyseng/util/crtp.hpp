@@ -18,10 +18,19 @@
 
 namespace physeng
 {
+	/**
+	 * @brief A simple helper to simplify the use of CRTP throughout the engine
+	 */
 	template<typename Type, template<typename> class CrtpType>
 	struct crtp
 	{
+		/**
+		 * @brief Access the underlying type of the CRTP
+		 */
 		constexpr auto underlying() -> Type& { return static_cast<Type&>(*this); }
+		/**
+		 * @brief Access the underlying type of the CRTP
+		 */
 		constexpr auto underlying() const -> Type const& { return static_cast<Type const&>(*this); }
 	};
 } // namespace physeng

@@ -1,0 +1,8 @@
+config.version = 1
+
+config.cc.coptions = -O0 -g -fno-omit-frame-pointer -ftrivial-auto-var-init=zero
+
+config.c = gcc
+
+config.cxx = g++
+config.cxx.coptions = -Wall -Wextra -Wunused -Woverloaded-virtual -Wcast-align -Wconversion -Werror

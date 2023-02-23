@@ -1,0 +1,8 @@
+config.version = 1
+
+config.cc.coptions = -O0 -g -fno-omit-frame-pointer 
+
+config.c = clang
+
+config.cxx = clang++
+config.cxx.coptions = -Wall -Wextra -Wunused -Woverloaded-virtual -Wcast-align -Wconversion -Werror
