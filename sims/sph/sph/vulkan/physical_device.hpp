@@ -17,11 +17,21 @@
 
 #pragma once
 
-#include <span>
-#include <string_view>
+#include <sph/vulkan/details/vulkan.hpp>
 
-/**
- *
- */
-extern void physeng_main(std::span<std::string_view const> args);
+#include <libphyseng/util/semantic_version.hpp>
+#include <libphyseng/util/strong_ops/comparable.hpp>
+#include <libphyseng/util/strong_type.hpp>
 
+#include <cstdint>
+
+namespace vulkan
+{
+	using vendor_id =
+		physeng::strong_type<std::uint32_t, struct vender_id_tag, physeng::strong::equatable>;
+	using driver_version = physeng::strong_type<std::uint32_t, struct driver_version_tag>;
+
+	static constexpr auto const nvidia_vendor_id = vendor_id{4318};
+
+	auto get_driver_version(vendor_id id, driver_version version) -> physeng::semantic_version const;
+} // namespace vulkan

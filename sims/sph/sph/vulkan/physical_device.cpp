@@ -15,13 +15,23 @@
  */
 
 
-#pragma once
+#include <sph/vulkan/physical_device.hpp>
 
-#include <span>
-#include <string_view>
+#include <sph/core.hpp>
+#include <sph/vulkan/details/vulkan.hpp>
 
-/**
- *
- */
-extern void physeng_main(std::span<std::string_view const> args);
+namespace vulkan
+{
+	auto get_driver_version(vendor_id id, driver_version version)
+		-> physeng::semantic_version const
+	{
+		if (id == nvidia_vendor_id)
+		{
+			return {.major = (version.get() >> 22u) & 0x3ffu,
+					.minor = (version.get() >> 14u) & 0x0ffu,
+					.patch = (version.get() >> 6u) & 0x0ffu};
+		}
 
+		return vulkan::from_vulkan_version(version.get());
+	}
+} // namespace vulkan

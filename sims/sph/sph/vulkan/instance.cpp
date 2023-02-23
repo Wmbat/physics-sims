@@ -1,3 +1,20 @@
+/**
+ * Copyright 2023 wmbat
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 #include <sph/vulkan/instance.hpp>
 
 #include <sph/core.hpp>
@@ -42,7 +59,7 @@ namespace
 	static VKAPI_ATTR auto VKAPI_CALL debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
-		const VkDebugUtilsMessengerCallbackDataEXT* p_callback_data, void* p_user_data) -> VkBool32
+		VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data, void* p_user_data) -> VkBool32
 	{
 		assert(p_user_data != nullptr); // NOLINT
 
@@ -164,7 +181,8 @@ namespace
 
 namespace vulkan
 {
-	auto instance::make(std::string_view app_name, spdlog::logger& logger) -> tl::expected<instance, instance_error>
+	auto instance::make(std::string_view app_name, spdlog::logger& logger)
+		-> tl::expected<instance, instance_error>
 	{
 		auto loader = load_vulkan_symbols();
 		auto instance = create_vk_instance(app_name);
@@ -180,6 +198,11 @@ namespace vulkan
 	{}
 
 	instance::operator vk::Instance() const
+	{
+		return m_instance.get();
+	}
+
+	auto instance::get() const -> vk::Instance
 	{
 		return m_instance.get();
 	}

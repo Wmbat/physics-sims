@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
-#include <span>
-#include <string_view>
-
-/**
- *
- */
-extern void physeng_main(std::span<std::string_view const> args);
-
+namespace physeng
+{
+	template<typename Type, template<typename> class CrtpType>
+	struct crtp
+	{
+		constexpr auto underlying() -> Type& { return static_cast<Type&>(*this); }
+		constexpr auto underlying() const -> Type const& { return static_cast<Type const&>(*this); }
+	};
+} // namespace physeng

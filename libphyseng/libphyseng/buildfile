@@ -1,5 +1,6 @@
 intf_libs = # Interface dependencies.
-import intf_libs = range-v3%lib{range-v3}
+import intf_libs += fmt%lib{fmt}
+import intf_libs += range-v3%lib{range-v3}
 impl_libs = # Implementation dependencies.
 #import xxxx_libs += libhello%lib{hello}
 

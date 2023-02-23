@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
-#include <span>
-#include <string_view>
+#include <libphyseng/util/crtp.hpp>
 
-/**
- *
- */
-extern void physeng_main(std::span<std::string_view const> args);
-
+namespace physeng::inline v0::strong // NOLINT
+{
+	template<typename Type>
+	struct multiplicable : crtp<Type, multiplicable>
+	{
+		constexpr auto operator*(Type const& other) const -> Type
+		{
+			return Type(this->underlying().get() * other.get());
+		}
+		constexpr auto operator*=(Type const& other) -> Type&
+		{
+			this->underlying().get() *= other.get();
+			return this->underlying();
+		}
+	};
+} // namespace physeng::inline v0::strong
