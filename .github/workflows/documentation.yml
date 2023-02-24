@@ -32,17 +32,31 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: true
+      - name: Update dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential ninja-build cmake xxd groff unzip pkg-config
+          sudo apt-get -y install llvm-14 clang-14 libclang-common-14-dev libclang-14-dev lld-14 libssl-dev
+          sudo apt-get -y install python3-pip
+          sudo pip3 install compiledb
+          sudo pip3 install meson
+      - name: Build hdoc
+        run: |
+          cd ../ && git clone https://github.com/hdoc/hdoc.git && cd hdoc/
+          export CC=/usr/bin/clang
+          export CXX=/usr/bin/clang++
+          meson setup --prefer-static build
+          ninja -C build
+          cd ../ && ls -lah
       - uses: build2/setup-build2-github-action@v2
         with:
           build2-version: staged
-      - name: Install dependencies
-        run: pip install compiledb
-      - name: Update dependencies
-        run: sudo apt-get update
       - name: Configure
-        run: bdep init -C @cc cc config.config.load=build-config/${{matrix.config.config_file}}
+        run: bdep init -C @cc cc config.config.load=build-config/clang.debug.build
       - name: Generate Compilation database
         run: b -vn clean update |& compiledb
+      - name: Generate documentation
+        run: ../hdoc/build/hdoc ./
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
