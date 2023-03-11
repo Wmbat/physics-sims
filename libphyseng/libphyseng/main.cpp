@@ -21,8 +21,8 @@
  * @brief Implementation of main by the engine
  */
 
-
 #include <libphyseng/main.hpp>
+#include <libphyseng/util/ranges_helpers.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/span.hpp>
@@ -32,12 +32,10 @@
 
 auto main(int argc, char *argv[]) -> int
 {
-	namespace stdr = std::ranges;
-
 	auto const args = ranges::span{argv, argc} | ranges::to<std::vector<std::string_view>>;
 
 	// If we have no arguments, there is something wrong
-	if (stdr::empty(args))
+	if (physeng::is_empty(args))
 	{
 		return -1;
 	}
