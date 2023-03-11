@@ -59,9 +59,9 @@ void physeng_main(std::span<const std::string_view> args)
 
 	let gpu_properties = physical_device.getProperties();
 
-	let driver_version =
-		vulkan::get_driver_version(vulkan::vendor_id{gpu_properties.vendorID},
-								   vulkan::driver_version{gpu_properties.driverVersion});
+	let vendor_id = vulkan::vendor_id{gpu_properties.vendorID};
+	let device_vendor = vulkan::get_device_vendor_from_id(vendor_id);
+	let driver_version = vulkan::get_driver_version(device_vendor.value(), gpu_properties.driverVersion);
 
 	app_logger.info("GPU name: {}\n", gpu_properties.deviceName);
 	app_logger.info("GPU driver version: {}\n", driver_version);
