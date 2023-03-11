@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 // Normally we don't export class templates (but do complete specializations),

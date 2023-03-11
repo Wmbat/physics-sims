@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @file libphyseng/libphyseng/main.hpp
+ * @author wmbat wmbat-dev@protonmail.com
+ * @date 26/02/2023
+ * @brief Defines the engines main entry point
+ */
+
+
 #pragma once
 
 #include <span>

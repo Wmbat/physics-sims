@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file libphyseng/libphyseng/main.cpp
+ * @author wmbat wmbat-dev@protonmail.com
+ * @date 26/02/2023
+ * @brief Implementation of main by the engine
+ */
+
 
 #include <libphyseng/main.hpp>
 
