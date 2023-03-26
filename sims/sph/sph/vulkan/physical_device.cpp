@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "sph/vulkan/vendor.hpp"
 #include <sph/core.hpp>
 #include <sph/vulkan/details/vulkan.hpp>
 #include <sph/vulkan/physical_device.hpp>
@@ -25,7 +26,8 @@
 
 #include <range/v3/algorithm/max_element.hpp>
 #include <range/v3/functional/arithmetic.hpp>
-#include <range/v3/to_container.hpp>
+#include <range/v3/functional/comparisons.hpp>
+#include <range/v3/range/conversion.hpp>
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
@@ -34,8 +36,8 @@
 
 #include <cstdint>
 #include <optional>
-#include <utility>
 #include <ranges>
+#include <utility>
 
 namespace rv = ranges::views;
 
@@ -64,37 +66,39 @@ namespace
 		return !vulkan::get_device_vendor_from_id(vendor_id);
 	}
 
+	auto rate_device_properties(physical_device_info const& /*info*/) -> int
+	{
+		return 0;
+	}
+
 	auto rate_device_features(physical_device_info const& /*info*/) -> int
 	{
 		return 0;
 	}
 
-	auto rate_device_queue_support(physical_device_info const&) -> int {}
-
-	auto combine_ratings(std::tuple<int, int> ratings) -> int
+	auto rate_device_queue_support(physical_device_info const& info) -> int
 	{
-		return std::get<0>(ratings) + std::get<1>(ratings);
+		std::span queue_families = info.queue_families;
+
+		return 0;
 	}
 
-	/**
-	 * @brief
-	 *
-	 * @param[in] lhs
-	 * @param[in] rhs
-	 *
-	 * @return True if the lhs' rating is greater than the rhs'
-	 */
-	auto greater_rating(std::tuple<physical_device_info, int> lhs,
-						std::tuple<physical_device_info, int> rhs) -> bool
+	auto get_rating_value(std::tuple<physical_device_info, int> value)
 	{
-		return std::get<1>(lhs) > std::get<1>(rhs);
+		return std::get<1>(value);
+	}
+
+	auto rate_physical_device(physical_device_info const& info)
+	{
+		return rate_device_properties(info) + rate_device_features(info)
+			 + rate_device_queue_support(info);
 	}
 } // namespace
 
 namespace vulkan
 {
 	auto get_driver_version(device_vendor vendor, std::uint32_t version)
-		-> physeng::semantic_version const
+		-> physeng::semantic_version
 	{
 		if (vendor == device_vendor::nvidia)
 		{
@@ -106,54 +110,36 @@ namespace vulkan
 		return vulkan::from_vulkan_version(version);
 	}
 
-	auto get_device_vendor_from_id(vendor_id id) -> std::optional<device_vendor>
-	{
-		if (id.get() == std::to_underlying(device_vendor::amd))
-		{
-			return device_vendor::amd;
-		}
-		else if (id.get() == std::to_underlying(device_vendor::arm))
-		{
-			return device_vendor::arm;
-		}
-		else if (id.get() == std::to_underlying(device_vendor::intel))
-		{
-			return device_vendor::intel;
-		}
-		else if (id.get() == std::to_underlying(device_vendor::nvidia))
-		{
-			return device_vendor::nvidia;
-		}
-		else if (id.get() == std::to_underlying(device_vendor::qualcomm))
-		{
-			return device_vendor::qualcomm;
-		}
-		else
-		{
-			return std::nullopt;
-		}
-	}
-
 	auto find_best_suited_physical_device(std::span<vk::PhysicalDevice const> devices)
-		-> physical_device
+		-> std::optional<physical_device>
 	{
-		let supported_vendor_devices = devices 
+		// clang-format off
+
+		let supported_devices = devices 
 			| rv::transform(populate_physical_device_info)
 			| rv::filter(is_vendor_supported) 
 			| ranges::to<std::vector>;
 
-		let combined_ratings =
-			rv::zip(supported_vendor_devices | rv::transform(rate_device_features),
-					supported_vendor_devices | rv::transform(rate_device_queue_support))
-			| rv::transform(combine_ratings);
-		let device_ratings = rv::zip(supported_vendor_devices, combined_ratings);
+		// clang-format on
 
-		let best_device_it = ranges::max_element(device_ratings, greater_rating);
-		if (best_device_it != ranges::end(device_ratings))
+		let device_ratings = supported_devices | rv::transform(rate_physical_device);
+		let rated_devices = rv::zip(supported_devices, device_ratings);
+
+		if (let it = ranges::max_element(rated_devices, ranges::greater{}, get_rating_value);
+			it != ranges::end(rated_devices))
 		{
-			auto best_device = std::get<0>(*best_device_it);
+			let& device_info = std::get<0>(*it);
+			let device_vendor_id = vendor_id{device_info.properties.vendorID};
+
+			let vendor = get_device_vendor_from_id(device_vendor_id).value(); // NOLINT
+
+			return physical_device{
+				.name = device_info.properties.deviceName,
+				.vendor = vendor,
+				.driver_version = get_driver_version(vendor, device_info.properties.driverVersion),
+				.value = device_info.device};
 		}
 
-		return {};
+		return std::nullopt;
 	}
 } // namespace vulkan

@@ -18,8 +18,10 @@
 #include <sph/vulkan/details/vulkan.hpp>
 #include <sph/vulkan/instance.hpp>
 #include <sph/vulkan/physical_device.hpp>
+#include <sph/vulkan/vendor.hpp>
 
 #include <libphyseng/main.hpp>
+#include <libphyseng/util/enum_helpers.hpp>
 #include <libphyseng/util/semantic_version.hpp>
 
 #include <spdlog/logger.h>
@@ -53,16 +55,11 @@ void physeng_main(std::span<const std::string_view> args)
 	let app_name = args[0];
 
 	auto app_logger = create_logger(app_name);
-	// TODO: do actual error checking
+
 	let instance = vulkan::instance::make(app_name, app_logger).value();
-	let physical_device = instance.get().enumeratePhysicalDevices()[0];
+	let physical_devices = instance->enumeratePhysicalDevices();
+	let best_device = vulkan::find_best_suited_physical_device(physical_devices);
 
-	let gpu_properties = physical_device.getProperties();
-
-	let vendor_id = vulkan::vendor_id{gpu_properties.vendorID};
-	let device_vendor = vulkan::get_device_vendor_from_id(vendor_id);
-	let driver_version = vulkan::get_driver_version(device_vendor.value(), gpu_properties.driverVersion);
-
-	app_logger.info("GPU name: {}\n", gpu_properties.deviceName);
-	app_logger.info("GPU driver version: {}\n", driver_version);
+	app_logger.info("Selected device: {{name: {}, vendor: {}, driver version: {}}}\n",
+					best_device->name, best_device->vendor, best_device->driver_version);
 }

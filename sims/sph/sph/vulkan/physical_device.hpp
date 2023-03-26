@@ -24,6 +24,7 @@
 #pragma once
 
 #include <sph/vulkan/details/vulkan.hpp>
+#include <sph/vulkan/vendor.hpp>
 
 #include <libphyseng/util/semantic_version.hpp>
 #include <libphyseng/util/strong_ops/comparable.hpp>
@@ -38,52 +39,33 @@ namespace vulkan
 	/**
 	 * @brief
 	 */
-	using vendor_id =
-		physeng::strong_type<std::uint32_t, struct vender_id_tag, physeng::strong::equatable>;
-
-	/**
-	 * @brief
-	 */
-	enum struct device_vendor
-	{
-		amd = 0x1002,	  ///<
-		arm = 0x13b5,	  ///<
-		intel = 0x8086,	  ///<
-		nvidia = 0x10de,  ///<
-		qualcomm = 0x5143 ///<
-	};
-
 	struct physical_device
 	{
 		std::string name;
 		device_vendor vendor;
 		physeng::semantic_version driver_version;
 
-		vk::PhysicalDevice physical_device;
+		vk::PhysicalDevice value;
 	};
 
 	/**
-	 * @brief Takes the vendor id number of the vulkan physical device and converts it into a more
-	 * usable `device_vendor` enum value
+	 * @brief 
 	 *
-	 * @param[in] id The `vendor_id` retrieved from the vulkan physical device
-	 *
-	 * @return The `device_vendor` associated with the `vendor_id` or an empty std::optional if the
-	 * `vendor_id` does not match any of the supported vendors
-	 */
-	auto get_device_vendor_from_id(vendor_id id) -> std::optional<device_vendor>;
-
-	/**
-	 * @brief
-	 *
-	 * @param[in] vendor
-	 * @param[in] packed_version The packed version given by the vulkan physical device
+	 * @param[in] vendor The device vendor of the physical device.
+	 * @param[in] packed_version The packed version given by the vulkan physical device.
 	 *
 	 * @return The extracted semantic version of the driver
 	 */
 	auto get_driver_version(device_vendor vendor, std::uint32_t packed_version)
-		-> physeng::semantic_version const;
+		-> physeng::semantic_version;
 
+	/**
+	 * @brief
+	 *
+	 * @param[in] devices The list of available physical devices
+	 *
+	 * @return
+	 */
 	auto find_best_suited_physical_device(std::span<vk::PhysicalDevice const> devices)
-		-> physical_device;
+		-> std::optional<physical_device>;
 } // namespace vulkan

@@ -13,3 +13,4 @@ depends: * bpkg >= 0.15.0
 
 depends: range-v3 ^0.12.0
 depends: fmt ^8.1.1
+depends: magic_enum ^0.8.1

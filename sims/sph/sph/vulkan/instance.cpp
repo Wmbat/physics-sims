@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include <sph/vulkan/instance.hpp>
 
 #include <sph/core.hpp>
@@ -202,8 +201,21 @@ namespace vulkan
 		return m_instance.get();
 	}
 
-	auto instance::get() const -> vk::Instance
+	auto instance::value() const -> const vk::Instance
 	{
 		return m_instance.get();
+	}
+	auto instance::value() -> vk::Instance
+	{
+		return m_instance.get();
+	}
+
+	auto instance::operator->() const noexcept -> vk::Instance const*
+	{
+		return &m_instance.get();
+	}
+	auto instance::operator->() noexcept -> vk::Instance*
+	{
+		return &m_instance.get();
 	}
 } // namespace vulkan

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include <sph/vulkan/details/vulkan.hpp>
@@ -41,7 +40,11 @@ namespace vulkan
 		 */
 		operator vk::Instance() const;
 
-		[[nodiscard]] auto get() const -> vk::Instance;
+		[[nodiscard]] auto value() const -> const vk::Instance;
+		[[nodiscard]] auto value() -> vk::Instance;
+
+		auto operator->() const noexcept -> vk::Instance const*;
+		auto operator->() noexcept -> vk::Instance*;
 
 	private:
 		instance(vk::DynamicLoader&& loader, vk::UniqueInstance&& instance,
