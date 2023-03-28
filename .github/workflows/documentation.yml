@@ -29,8 +29,12 @@ jobs:
           sudo apt-get -y update
           sudo apt-get -y install doxygen
 
+      - name: Build Documentation
+        run: doxygen Doxyfile
+
       - name: Publish Documentation
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_dir: ../physics-sims-docs/html/
+          enable_jekyll: false
