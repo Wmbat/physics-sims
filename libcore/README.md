@@ -1,0 +1,3 @@
+# libcore
+
+C++ library

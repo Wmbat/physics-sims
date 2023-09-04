@@ -1,0 +1,6 @@
+$out_root/
+{
+  include libphysics/
+}
+
+export $out_root/libphysics/$import.target

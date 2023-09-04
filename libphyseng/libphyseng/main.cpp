@@ -21,8 +21,6 @@
 #include <range/v3/view/span.hpp>
 #include <range/v3/view/tail.hpp>
 
-#include <ranges>
-
 auto main(int argc, char *argv[]) -> int
 {
 	namespace stdr = std::ranges;
@@ -30,7 +28,7 @@ auto main(int argc, char *argv[]) -> int
 	auto const args = ranges::span{argv, argc} | ranges::to<std::vector<std::string_view>>;
 
 	// If we have no arguments, there is something wrong
-	if (stdr::empty(args))
+	if (ranges::empty(args))
 	{
 		return -1;
 	}

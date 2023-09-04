@@ -15,18 +15,17 @@
  */
 
 #include <sph/core.hpp>
-#include <sph/vulkan/details/vulkan.hpp>
-#include <sph/vulkan/instance.hpp>
-#include <sph/vulkan/physical_device.hpp>
 
-#include <libphyseng/main.hpp>
-#include <libphyseng/util/semantic_version.hpp>
+#include <libcore/core.hpp>
+#include <librender/system.hpp>
 
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <memory>
+
+using namespace std::literals::chrono_literals;
 
 namespace
 {
@@ -48,21 +47,15 @@ namespace
 	}
 } // namespace
 
-void physeng_main(std::span<const std::string_view> args)
+void core_main(std::span<const std::string_view> args)
 {
 	let app_name = args[0];
 
 	auto app_logger = create_logger(app_name);
-	// TODO: do actual error checking
-	let instance = vulkan::instance::make(app_name, app_logger).value();
-	let physical_device = instance.get().enumeratePhysicalDevices()[0];
 
-	let gpu_properties = physical_device.getProperties();
-
-	let driver_version =
-		vulkan::get_driver_version(vulkan::vendor_id{gpu_properties.vendorID},
-								   vulkan::driver_version{gpu_properties.driverVersion});
-
-	app_logger.info("GPU name: {}\n", gpu_properties.deviceName);
-	app_logger.info("GPU driver version: {}\n", driver_version);
+	if (auto res = engine::system::make()) 
+	{
+		auto render_system = res.value();
+		render_system.update(16ms);
+	}
 }

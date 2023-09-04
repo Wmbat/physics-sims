@@ -2,3 +2,12 @@
 location: sims/sph/
 :
 location: libphyseng/
+
+:
+location: libcore/
+
+:
+location: libphysics/
+
+:
+location: librender/

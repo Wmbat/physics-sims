@@ -1,0 +1,47 @@
+intf_libs = # Interface dependencies.
+import intf_libs += fmt%lib{fmt}
+import intf_libs += range-v3%lib{range-v3}
+impl_libs = # Implementation dependencies.
+#import xxxx_libs += libhello%lib{hello}
+
+lib{core}: {hxx ixx txx cxx}{** -version} hxx{version} $impl_libs $intf_libs
+
+hxx{version}: in{version} $src_root/manifest
+
+hxx{export}@./: cxx.importable = false
+
+# Build options.
+#
+cxx.poptions =+ "-I$out_root" "-I$src_root"
+
+{hbmia obja}{*}: cxx.poptions += -DLIBCORE_STATIC_BUILD
+{hbmis objs}{*}: cxx.poptions += -DLIBCORE_SHARED_BUILD
+
+# Export options.
+#
+lib{core}:
+{
+  cxx.export.poptions = "-I$out_root" "-I$src_root"
+  cxx.export.libs = $intf_libs
+}
+
+liba{core}: cxx.export.poptions += -DLIBCORE_STATIC
+libs{core}: cxx.export.poptions += -DLIBCORE_SHARED
+
+# For pre-releases use the complete version to make sure they cannot be used
+# in place of another pre-release or the final version. See the version module
+# for details on the version.* variable values.
+#
+if $version.pre_release
+  lib{core}: bin.lib.version = "-$version.project_id"
+else
+  lib{core}: bin.lib.version = "-$version.major.$version.minor"
+
+# Install into the libcore/ subdirectory of, say, /usr/include/
+# recreating subdirectories.
+#
+{hxx ixx txx}{*}:
+{
+  install         = include/libcore/
+  install.subdirs = true
+}

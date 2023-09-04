@@ -1,0 +1,6 @@
+$out_root/
+{
+  include librender/
+}
+
+export $out_root/librender/$import.target

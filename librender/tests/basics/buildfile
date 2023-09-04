@@ -1,0 +1,3 @@
+import libs = librender%lib{render}
+
+exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}

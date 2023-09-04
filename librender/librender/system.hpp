@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
+#pragma once
 
-#include <sph/vulkan/physical_device.hpp>
-
-#include <sph/core.hpp>
-#include <sph/vulkan/details/vulkan.hpp>
-
-namespace vulkan
+#include <chrono>
+namespace engine
 {
-	auto get_driver_version(vendor_id id, driver_version version)
-		-> physeng::semantic_version const
+	struct system
 	{
-		if (id == nvidia_vendor_id)
-		{
-			return {.major = (version.get() >> 22u) & 0x3ffu,
-					.minor = (version.get() >> 14u) & 0x0ffu,
-					.patch = (version.get() >> 6u) & 0x0ffu};
-		}
+	public:
+		static auto make() -> std::optional<system>;
 
-		return vulkan::from_vulkan_version(version.get());
-	}
-} // namespace vulkan
+	private:
+		system() = default;
+
+	public:
+		void update(std::chrono::milliseconds dt);
+	};
+} // namespace engine

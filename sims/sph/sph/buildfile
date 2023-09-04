@@ -1,5 +1,7 @@
 libs =
-import libs += libphyseng%lib{physeng}
+import libs += libcore%lib{core}
+import libs += libphysics%lib{physics}
+import libs += librender%lib{render}
 import libs += Vulkan-Hpp%lib{Vulkan-Hpp}
 import libs += tl-expected%lib{tl-expected}
 import libs += spdlog%lib{spdlog}
