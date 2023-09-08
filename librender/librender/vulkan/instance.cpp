@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-#pragma once
+#include <librender/vulkan/instance.hpp>
 
 #include <tl/expected.hpp>
 
-#include <chrono>
 #include <system_error>
 
-namespace render
-{
-	struct system
-	{
-	public:
-		static auto make() -> tl::expected<system, std::error_code>
-		{
-			return tl::unexpected(std::error_code{});
-		}
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE; // NOLINT
 
-	public:
-		void update(std::chrono::milliseconds dt);
-	};
-} // namespace render
+namespace render::vk
+{
+	auto instance::make(std::string_view app_name, spdlog::logger& logger)
+		-> tl::expected<instance, std::error_code>
+	{
+	}
+
+	instance::instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance instance,
+					   ::vk::UniqueDebugUtilsMessengerEXT debug_utils) :
+		m_loader(std::move(loader)),
+		m_instance(std::move(instance)), m_debug_utils(std::move(debug_utils))
+	{}
+} // namespace render::vk

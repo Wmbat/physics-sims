@@ -1,4 +1,6 @@
 intf_libs = # Interface dependencies.
+import intf_libs += libcore%lib{core}
+import intf_libs += spdlog%lib{spdlog}
 impl_libs = # Implementation dependencies.
 #import xxxx_libs += libhello%lib{hello}
 

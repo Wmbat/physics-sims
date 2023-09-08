@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-#pragma once
+#include <libcore/error/panic.hpp>
 
-#include <tl/expected.hpp>
+#include <fmt/core.h>
 
-#include <chrono>
-#include <system_error>
+#include <exception>
 
-namespace render
+namespace core::detail
 {
-	struct system
+	void panic_impl(std::string_view message) noexcept
 	{
-	public:
-		static auto make() -> tl::expected<system, std::error_code>
-		{
-			return tl::unexpected(std::error_code{});
-		}
-
-	public:
-		void update(std::chrono::milliseconds dt);
-	};
-} // namespace render
+		fmt::print(stderr, "{}", message);
+		std::terminate();
+	}
+} // namespace core::detail

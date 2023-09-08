@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-#pragma once
-
-#include <tl/expected.hpp>
+#include <librender/system.hpp>
 
 #include <chrono>
-#include <system_error>
 
 namespace render
 {
-	struct system
-	{
-	public:
-		static auto make() -> tl::expected<system, std::error_code>
-		{
-			return tl::unexpected(std::error_code{});
-		}
-
-	public:
-		void update(std::chrono::milliseconds dt);
-	};
+	void system::update(std::chrono::milliseconds) {}
 } // namespace render

@@ -16,22 +16,27 @@
 
 #pragma once
 
+#include <librender/vulkan/include.hpp>
+
+#include <spdlog/logger.h>
+
 #include <tl/expected.hpp>
 
-#include <chrono>
-#include <system_error>
-
-namespace render
+namespace render::vk
 {
-	struct system
+	struct instance
 	{
 	public:
-		static auto make() -> tl::expected<system, std::error_code>
-		{
-			return tl::unexpected(std::error_code{});
-		}
+		static auto make(std::string_view app_name, spdlog::logger& logger)
+			-> tl::expected<instance, std::error_code>;
 
-	public:
-		void update(std::chrono::milliseconds dt);
+	private:
+		instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance instance,
+				 ::vk::UniqueDebugUtilsMessengerEXT debug_utils);
+
+	private:
+		::vk::DynamicLoader m_loader = {};
+		::vk::UniqueInstance m_instance = {};
+		::vk::UniqueDebugUtilsMessengerEXT m_debug_utils = {};
 	};
-} // namespace render
+} // namespace render::vk

@@ -17,6 +17,7 @@
 #include <sph/core.hpp>
 
 #include <libcore/core.hpp>
+#include <libcore/error/panic.hpp>
 #include <librender/system.hpp>
 
 #include <spdlog/logger.h>
@@ -53,9 +54,13 @@ void core_main(std::span<const std::string_view> args)
 
 	auto app_logger = create_logger(app_name);
 
-	if (auto res = engine::system::make()) 
+	if (auto res = render::system::make())
 	{
 		auto render_system = res.value();
 		render_system.update(16ms);
+	}
+	else
+	{
+		core::panic("{}", res.error());
 	}
 }

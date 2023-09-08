@@ -11,4 +11,6 @@ email: wmbat-dev@protonmail.com
 #build-error-email: wmbat-dev@protonmail.com
 depends: * build2 >= 0.16.0
 depends: * bpkg >= 0.16.0
-#depends: libhello ^1.0.0
+
+depends: libcore >= 0.0.0
+depends: spdlog ^1.10.0
