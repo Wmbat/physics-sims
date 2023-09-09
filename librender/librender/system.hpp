@@ -16,7 +16,11 @@
 
 #pragma once
 
+#include <libcore/application_info.hpp>
+
 #include <tl/expected.hpp>
+
+#include <spdlog/logger.h>
 
 #include <chrono>
 #include <system_error>
@@ -26,10 +30,8 @@ namespace render
 	struct system
 	{
 	public:
-		static auto make() -> tl::expected<system, std::error_code>
-		{
-			return tl::unexpected(std::error_code{});
-		}
+		static auto make(core::application_info const& app_info, spdlog::logger& logger)
+			-> tl::expected<system, std::error_code>;
 
 	public:
 		void update(std::chrono::milliseconds dt);

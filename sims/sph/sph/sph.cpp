@@ -15,9 +15,12 @@
  */
 
 #include <sph/core.hpp>
+#include <sph/version.hpp>
 
+#include <libcore/application_info.hpp>
 #include <libcore/core.hpp>
 #include <libcore/error/panic.hpp>
+#include <libcore/semantic_version.hpp>
 #include <librender/system.hpp>
 
 #include <spdlog/logger.h>
@@ -50,11 +53,14 @@ namespace
 
 void core_main(std::span<const std::string_view> args)
 {
-	let app_name = args[0];
+	auto const app_info = core::application_info{
+		.name = args[0],
+		.version = core::semantic_version{
+			.major = SPH_VERSION_MAJOR, .minor = SPH_VERSION_MINOR, .patch = SPH_VERSION_MINOR}};
 
-	auto app_logger = create_logger(app_name);
+	auto app_logger = create_logger(app_info.name);
 
-	if (auto res = render::system::make())
+	if (auto res = render::system::make(app_info, app_logger))
 	{
 		auto render_system = res.value();
 		render_system.update(16ms);

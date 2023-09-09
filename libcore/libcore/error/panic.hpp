@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @file libcore/libcore/error/panic.hpp
+ * @author wmbat wmbat-dev@protonmail.com
+ * @date 09/08/2023
+ * @brief Implementation of a panic function in care of critical errors
+ */
+
+
 #pragma once
 
 #include <fmt/format.h>
@@ -72,6 +80,6 @@ namespace core
 	{
 		auto const message = fmt::format("{}:{} panic: {}\n", fmt.loc.file_name(), fmt.loc.line(),
 										 fmt::format(fmt.format, std::forward<Args>(args)...));
-		panic_impl(message);
+		detail::panic_impl(message);
 	}
 } // namespace core

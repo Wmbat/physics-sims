@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-#include <librender/system.hpp>
-#include <librender/vulkan/instance.hpp>
+/**
+ * @file libcore/libcore/application_info.hpp
+ * @author wmbat wmbat-dev@protonmail.com
+ * @date 09/08/2023
+ * @brief Contains the information about the user's application
+ */
 
-#include <spdlog/logger.h>
+#pragma once
 
-#include <chrono>
+#include <libcore/semantic_version.hpp>
 
-namespace render
+#include <string>
+
+namespace core
 {
-	auto system::make(core::application_info const& app_info, spdlog::logger& logger)
-		-> tl::expected<system, std::error_code>
+	/**
+	 * @brief Information about a specific information.
+	 */
+	struct application_info
 	{
-		[[maybe_unused]] auto instance = vk::instance::make(app_info, logger);
-
-		return {};
-	}
-
-	void system::update(std::chrono::milliseconds) {}
-} // namespace render
+		std::string_view name;	  ///< The name of the application
+		semantic_version version; ///< The version of the application
+	};
+} // namespace core

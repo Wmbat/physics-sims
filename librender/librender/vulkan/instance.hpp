@@ -18,6 +18,9 @@
 
 #include <librender/vulkan/include.hpp>
 
+#include <libcore/application_info.hpp>
+#include <libcore/semantic_version.hpp>
+
 #include <spdlog/logger.h>
 
 #include <tl/expected.hpp>
@@ -27,7 +30,7 @@ namespace render::vk
 	struct instance
 	{
 	public:
-		static auto make(std::string_view app_name, spdlog::logger& logger)
+		static auto make(core::application_info const& app_info, spdlog::logger& logger)
 			-> tl::expected<instance, std::error_code>;
 
 	private:
