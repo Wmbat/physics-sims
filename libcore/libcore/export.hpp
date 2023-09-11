@@ -8,22 +8,22 @@
 // used before their inline definition. The workaround is to reorder code. In
 // the end it's all trial and error.
 
-#if defined(LIBCORE_STATIC)         // Using static.
-#  define LIBCORE_SYMEXPORT
+#if defined(LIBCORE_STATIC) // Using static.
+#    define LIBCORE_SYMEXPORT
 #elif defined(LIBCORE_STATIC_BUILD) // Building static.
-#  define LIBCORE_SYMEXPORT
-#elif defined(LIBCORE_SHARED)       // Using shared.
-#  ifdef _WIN32
-#    define LIBCORE_SYMEXPORT __declspec(dllimport)
-#  else
 #    define LIBCORE_SYMEXPORT
-#  endif
+#elif defined(LIBCORE_SHARED) // Using shared.
+#    ifdef _WIN32
+#        define LIBCORE_SYMEXPORT __declspec(dllimport)
+#    else
+#        define LIBCORE_SYMEXPORT
+#    endif
 #elif defined(LIBCORE_SHARED_BUILD) // Building shared.
-#  ifdef _WIN32
-#    define LIBCORE_SYMEXPORT __declspec(dllexport)
-#  else
-#    define LIBCORE_SYMEXPORT
-#  endif
+#    ifdef _WIN32
+#        define LIBCORE_SYMEXPORT __declspec(dllexport)
+#    else
+#        define LIBCORE_SYMEXPORT
+#    endif
 #else
 // If none of the above macros are defined, then we assume we are being used
 // by some third-party build system that cannot/doesn't signal the library
@@ -34,6 +34,7 @@
 // then you will probably want to replace the fallback with the (commented
 // out) error since it won't work for the shared case.
 //
-#  define LIBCORE_SYMEXPORT         // Using static or shared.
-//#  error define LIBCORE_STATIC or LIBCORE_SHARED preprocessor macro to signal libcore library type being linked
+#    define LIBCORE_SYMEXPORT // Using static or shared.
+// #  error define LIBCORE_STATIC or LIBCORE_SHARED preprocessor macro to signal libcore library
+// type being linked
 #endif

@@ -22,9 +22,9 @@
 
 namespace core::detail
 {
-	void panic_impl(std::string_view message) noexcept
-	{
-		fmt::print(stderr, "{}", message);
-		std::terminate();
-	}
+    void panic_impl(std::string_view message) noexcept
+    {
+        fmt::print(stderr, "{}", message);
+        std::terminate();
+    }
 } // namespace core::detail

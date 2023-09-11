@@ -1,10 +1,7 @@
 #pragma once
 
+#include <libcore/application_info.hpp>
 #include <libcore/core.hpp>
-#include <libcore/semantic_version.hpp>
+#include <libcore/error/panic.hpp>
 #include <libcore/export.hpp>
-
-#include <span>
-#include <string_view>
-
-extern void core_main(std::span<std::string_view const> args);
+#include <libcore/semantic_version.hpp>

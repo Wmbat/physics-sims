@@ -27,46 +27,60 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/span.hpp>
+#include <range/v3/view/tail.hpp>
+
+#include <cstdlib>
 #include <memory>
 
 using namespace std::literals::chrono_literals;
 
 namespace
 {
-	auto create_logger(std::string_view name) -> spdlog::logger
-	{
-		auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		console_sink->set_level(spdlog::level::trace);
-		console_sink->set_pattern("[%n] [%^%l%$] %v");
+    auto create_logger(std::string_view name) -> spdlog::logger
+    {
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        console_sink->set_level(spdlog::level::trace);
+        console_sink->set_pattern("[%n] [%^%l%$] %v");
 
-		auto file_sink =
-			std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{name} + ".logs", true);
-		file_sink->set_pattern("[%H:%M:%S.%f] [%n] [%^%l%$] %v");
-		file_sink->set_level(spdlog::level::trace);
+        auto file_sink =
+            std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{name} + ".logs", true);
+        file_sink->set_pattern("[%H:%M:%S.%f] [%n] [%^%l%$] %v");
+        file_sink->set_level(spdlog::level::trace);
 
-		auto logger = spdlog::logger(std::string(name), {console_sink, file_sink});
-		logger.set_level(spdlog::level::trace);
+        auto logger = spdlog::logger(std::string(name), {console_sink, file_sink});
+        logger.set_level(spdlog::level::trace);
 
-		return logger;
-	}
+        return logger;
+    }
 } // namespace
 
-void core_main(std::span<const std::string_view> args)
+auto main(int argc, char *argv[]) -> int
 {
-	auto const app_info = core::application_info{
-		.name = args[0],
-		.version = core::semantic_version{
-			.major = SPH_VERSION_MAJOR, .minor = SPH_VERSION_MINOR, .patch = SPH_VERSION_MINOR}};
+    auto const args = ranges::span{argv, argc} | ranges::to<std::vector<std::string_view>>;
 
-	auto app_logger = create_logger(app_info.name);
+    // If we have no arguments, there is something wrong
+    if (ranges::empty(args))
+    {
+        core::panic("No input parameters given !");
+    }
 
-	if (auto res = render::system::make(app_info, app_logger))
-	{
-		auto render_system = res.value();
-		render_system.update(16ms);
-	}
-	else
-	{
-		core::panic("{}", res.error());
-	}
+    auto const app_info = core::application_info{.name = args[0], .version = get_version()};
+    auto app_logger = create_logger(app_info.name);
+
+    if (auto res = render::system::make(app_info, app_logger))
+    {
+        auto render_system = res.value();
+        render_system.update(16ms);
+    }
+    else
+    {
+        app_logger.error("Failed to create the rendering system.");
+        app_logger.error("Failure Cause: {}", res.error());
+
+        return EXIT_FAILURE;
+    }
+
+    return 0;
 }

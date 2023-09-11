@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include <sph/version.hpp>
@@ -23,9 +22,7 @@
 
 #include <string_view>
 
-#define let auto const
-
 inline constexpr auto get_version() -> core::semantic_version
 {
-	return {.major = SPH_VERSION_MAJOR, .minor = SPH_VERSION_MINOR, .patch = SPH_VERSION_PATCH};
+    return {.major = SPH_VERSION_MAJOR, .minor = SPH_VERSION_MINOR, .patch = SPH_VERSION_PATCH};
 }

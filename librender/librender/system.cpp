@@ -23,13 +23,13 @@
 
 namespace render
 {
-	auto system::make(core::application_info const& app_info, spdlog::logger& logger)
-		-> tl::expected<system, std::error_code>
-	{
-		[[maybe_unused]] auto instance = vk::instance::make(app_info, logger);
+    auto system::make(core::application_info const& app_info, spdlog::logger& logger)
+        -> tl::expected<system, core::error>
+    {
+        return vk::instance::make(app_info, logger).transform([](vk::instance) {
+            return system{};
+        });
+    }
 
-		return {};
-	}
-
-	void system::update(std::chrono::milliseconds) {}
+    void system::update(std::chrono::milliseconds) {}
 } // namespace render

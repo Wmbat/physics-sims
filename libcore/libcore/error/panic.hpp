@@ -21,7 +21,6 @@
  * @brief Implementation of a panic function in care of critical errors
  */
 
-
 #pragma once
 
 #include <fmt/format.h>
@@ -33,53 +32,54 @@
 
 namespace core
 {
-	namespace detail
-	{
-		[[noreturn]] void panic_impl(std::string_view message) noexcept;
-	}
+    namespace detail
+    {
+        [[noreturn]] void panic_impl(std::string_view message) noexcept;
+    }
 
-	struct panic_dynamic_string_view
-	{
-		template<class Type>
-			requires std::constructible_from<std::string_view, Type>
-		panic_dynamic_string_view(
-			Type const& str, std::source_location loc = std::source_location::current()) noexcept :
-			str{str},
-			loc{loc}
-		{}
+    struct panic_dynamic_string_view
+    {
+        template<class Type>
+            requires std::constructible_from<std::string_view, Type>
+        panic_dynamic_string_view(
+            Type const& str, std::source_location loc = std::source_location::current()) noexcept :
+            str{str},
+            loc{loc}
+        {}
 
-		std::string_view str;
-		std::source_location loc;
-	};
+        std::string_view str;
+        std::source_location loc;
+    };
 
-	template<class... Args>
-	struct panic_format
-	{
-		template<class Type>
-		consteval panic_format(Type const& fmt,
-							   std::source_location loc = std::source_location::current()) :
-			format{fmt},
-			loc{loc}
-		{}
+    template<class... Args>
+    struct panic_format
+    {
+        template<class Type>
+        consteval panic_format(Type const& fmt,
+                               std::source_location loc = std::source_location::current()) :
+            format{fmt},
+            loc{loc}
+        {}
 
-		fmt::format_string<Args...> format;
-		std::source_location loc;
-	};
+        fmt::format_string<Args...> format;
+        std::source_location loc;
+    };
 
-	[[noreturn]] inline void panic(panic_dynamic_string_view str) noexcept
-	{
-		auto const message =
-			fmt::format("{}:{} panic: {}\n", str.loc.file_name(), str.loc.line(), str.str);
-		detail::panic_impl(message);
-	}
+    [[noreturn]] inline void panic(panic_dynamic_string_view str) noexcept
+    {
+        auto const message =
+            fmt::format("{}:{} panic: {}\n", str.loc.file_name(), str.loc.line(), str.str);
+        detail::panic_impl(message);
+    }
 
-	template<class... Args>
-	[[noreturn]] void panic(panic_format<std::type_identity_t<Args>...> fmt,
-							Args&&... args) noexcept
-		requires(sizeof...(Args) > 0)
-	{
-		auto const message = fmt::format("{}:{} panic: {}\n", fmt.loc.file_name(), fmt.loc.line(),
-										 fmt::format(fmt.format, std::forward<Args>(args)...));
-		detail::panic_impl(message);
-	}
+    template<class... Args>
+    [[noreturn]] void panic(panic_format<std::type_identity_t<Args>...> fmt,
+                            Args&&... args) noexcept
+        requires(sizeof...(Args) > 0)
+    {
+        auto const& loc = fmt.loc;
+        auto const details = fmt::format(fmt.format, std::forward<Args>(args)...);
+        auto const message = fmt::format("{}:{} panic: {}\n", loc.file_name(), loc.line(), details);
+        detail::panic_impl(message);
+    }
 } // namespace core

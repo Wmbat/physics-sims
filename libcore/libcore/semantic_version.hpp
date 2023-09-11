@@ -20,26 +20,28 @@
 
 #include <cstdint>
 
-namespace core 
+namespace core
 {
-	/**
-	 * @brief Represent a format convention for determining a version encoded using a major, minor
-	 * and patch
-	 */
-	struct semantic_version
-	{
-		std::uint32_t major; //< The major number of the version
-		std::uint32_t minor; //< The minor version of the number
-		std::uint32_t patch; //< The patch version of the number
-	};
-} // namespace physeng
+    /**
+     * @brief Represent a format convention for determining a version encoded using a major, minor
+     * and patch
+     */
+    struct semantic_version
+    {
+        std::uint32_t major; //< The major number of the version
+        std::uint32_t minor; //< The minor version of the number
+        std::uint32_t patch; //< The patch version of the number
+
+        constexpr auto operator<=>(semantic_version const& rhs) const = default;
+    };
+} // namespace core
 
 template<>
 struct fmt::formatter<core::semantic_version> : fmt::formatter<std::string_view>
 {
-	template<typename FormatContext>
-	auto format(core::semantic_version const& version, FormatContext& ctx) const
-	{
-		return fmt::format_to(ctx.out(), "{}.{}.{}", version.major, version.minor, version.patch);
-	}
+    template<typename FormatContext>
+    auto format(core::semantic_version const& version, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}.{}.{}", version.major, version.minor, version.patch);
+    }
 };

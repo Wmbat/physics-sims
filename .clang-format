@@ -94,4 +94,4 @@ SpacesInSquareBrackets: false
 Standard: Latest
 TabWidth: 4
 UseCRLF: true
-UseTab: Always 
+UseTab: Never

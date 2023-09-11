@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-/**
- * @file libcore/libcore/application_info.hpp
- * @author wmbat wmbat-dev@protonmail.com
- * @date 09/08/2023
- * @brief Contains the information about the user's application
- */
-
 #pragma once
 
-#include <libcore/semantic_version.hpp>
-
 #include <string>
+#include <system_error>
+
+#include <fmt/core.h>
 
 namespace core
 {
-    /**
-     * @brief Information about a specific information.
-     */
-    struct application_info
+    struct error
     {
-        std::string_view name;    ///< The name of the application
-        semantic_version version; ///< The version of the application
+        std::error_code error_code;
+        std::string context;
     };
 } // namespace core
+
+template<>
+struct fmt::formatter<core::error>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<class FormatContext>
+    auto format(core::error const& error, FormatContext& ctx)
+    {
+        auto const& error_code = error.error_code;
+        return fmt::format_to(ctx.out(), "{0} ({1}: {2})", error.context,
+                              error_code.category().name(), error_code.message());
+    };
+};

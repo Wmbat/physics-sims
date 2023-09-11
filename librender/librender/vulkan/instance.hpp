@@ -19,6 +19,7 @@
 #include <librender/vulkan/include.hpp>
 
 #include <libcore/application_info.hpp>
+#include <libcore/error/error.hpp>
 #include <libcore/semantic_version.hpp>
 
 #include <spdlog/logger.h>
@@ -27,19 +28,26 @@
 
 namespace render::vk
 {
-	struct instance
-	{
-	public:
-		static auto make(core::application_info const& app_info, spdlog::logger& logger)
-			-> tl::expected<instance, std::error_code>;
+    enum struct instance_error
+    {
+        vulkan_version_too_low,
+    };
 
-	private:
-		instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance instance,
-				 ::vk::UniqueDebugUtilsMessengerEXT debug_utils);
+    auto make_error_code(instance_error error_code) -> std::error_code;
 
-	private:
-		::vk::DynamicLoader m_loader = {};
-		::vk::UniqueInstance m_instance = {};
-		::vk::UniqueDebugUtilsMessengerEXT m_debug_utils = {};
-	};
+    struct instance
+    {
+    public:
+        static auto make(core::application_info const& app_info, spdlog::logger& logger)
+            -> tl::expected<instance, core::error>;
+
+    private:
+        instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance instance,
+                 ::vk::UniqueDebugUtilsMessengerEXT debug_utils);
+
+    private:
+        ::vk::DynamicLoader m_loader = {};
+        ::vk::UniqueInstance m_instance = {};
+        ::vk::UniqueDebugUtilsMessengerEXT m_debug_utils = {};
+    };
 } // namespace render::vk

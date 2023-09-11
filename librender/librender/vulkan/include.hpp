@@ -19,43 +19,50 @@
 #include <libcore/semantic_version.hpp>
 
 #if !defined(VULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
-#	define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+#    define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #endif
 
 #if defined(__clang__)
-#	pragma clang diagnostic push
-#	pragma clang diagnostic ignored "-Wdeprecated-copy"
-#	pragma clang diagnostic ignored "-Wdefaulted-function-deleted"
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-copy"
+#    pragma clang diagnostic ignored "-Wdefaulted-function-deleted"
 #elif defined(__GNUC__) || defined(__GNUG__)
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wconversion"
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
+#if !defined(VULKAN_HPP_NO_EXCEPTIONS)
+#    define VULKAN_HPP_NO_EXCEPTIONS
+#endif
 #include <vulkan/vulkan.hpp>
 
 #if defined(__clang__)
-#	pragma clang diagnostic pop
+#    pragma clang diagnostic pop
 #elif defined(__GNUC__) || defined(__GNUG__)
-#	pragma GCC diagnostic pop
+#    pragma GCC diagnostic pop
 #endif
+
+#include <system_error>
 
 namespace render::vk
 {
 #if defined(NDEBUG)
-	static constexpr bool should_enable_validation_layers = false;
+    static constexpr bool should_enable_validation_layers = false;
 #else
-	static constexpr bool should_enable_validation_layers = true;
+    static constexpr bool should_enable_validation_layers = true;
 #endif
 
-	constexpr auto to_vulkan_version(core::semantic_version const& version) -> std::uint32_t
-	{
-		return VK_MAKE_API_VERSION(0, version.major, version.minor, version.patch);
-	}
+    constexpr auto to_vulkan_version(core::semantic_version const& version) -> std::uint32_t
+    {
+        return VK_MAKE_API_VERSION(0, version.major, version.minor, version.patch);
+    }
 
-	constexpr auto from_vulkan_version(std::uint32_t version) -> core::semantic_version
-	{
-		return {.major = VK_API_VERSION_MAJOR(version),
-				.minor = VK_API_VERSION_MINOR(version),
-				.patch = VK_API_VERSION_PATCH(version)};
-	}
+    constexpr auto from_vulkan_version(std::uint32_t version) -> core::semantic_version
+    {
+        return {.major = VK_API_VERSION_MAJOR(version),
+                .minor = VK_API_VERSION_MINOR(version),
+                .patch = VK_API_VERSION_PATCH(version)};
+    }
+
+    auto make_error_code(::vk::Result error_code) -> std::error_code;
 } // namespace render::vk

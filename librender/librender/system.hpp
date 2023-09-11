@@ -17,6 +17,7 @@
 #pragma once
 
 #include <libcore/application_info.hpp>
+#include <libcore/error/error.hpp>
 
 #include <tl/expected.hpp>
 
@@ -27,13 +28,13 @@
 
 namespace render
 {
-	struct system
-	{
-	public:
-		static auto make(core::application_info const& app_info, spdlog::logger& logger)
-			-> tl::expected<system, std::error_code>;
+    struct system
+    {
+    public:
+        static auto make(core::application_info const& app_info, spdlog::logger& logger)
+            -> tl::expected<system, core::error>;
 
-	public:
-		void update(std::chrono::milliseconds dt);
-	};
+    public:
+        void update(std::chrono::milliseconds dt);
+    };
 } // namespace render

@@ -8,22 +8,22 @@
 // used before their inline definition. The workaround is to reorder code. In
 // the end it's all trial and error.
 
-#if defined(LIBRENDER_STATIC)         // Using static.
-#  define LIBRENDER_SYMEXPORT
+#if defined(LIBRENDER_STATIC) // Using static.
+#    define LIBRENDER_SYMEXPORT
 #elif defined(LIBRENDER_STATIC_BUILD) // Building static.
-#  define LIBRENDER_SYMEXPORT
-#elif defined(LIBRENDER_SHARED)       // Using shared.
-#  ifdef _WIN32
-#    define LIBRENDER_SYMEXPORT __declspec(dllimport)
-#  else
 #    define LIBRENDER_SYMEXPORT
-#  endif
+#elif defined(LIBRENDER_SHARED) // Using shared.
+#    ifdef _WIN32
+#        define LIBRENDER_SYMEXPORT __declspec(dllimport)
+#    else
+#        define LIBRENDER_SYMEXPORT
+#    endif
 #elif defined(LIBRENDER_SHARED_BUILD) // Building shared.
-#  ifdef _WIN32
-#    define LIBRENDER_SYMEXPORT __declspec(dllexport)
-#  else
-#    define LIBRENDER_SYMEXPORT
-#  endif
+#    ifdef _WIN32
+#        define LIBRENDER_SYMEXPORT __declspec(dllexport)
+#    else
+#        define LIBRENDER_SYMEXPORT
+#    endif
 #else
 // If none of the above macros are defined, then we assume we are being used
 // by some third-party build system that cannot/doesn't signal the library
@@ -34,6 +34,7 @@
 // then you will probably want to replace the fallback with the (commented
 // out) error since it won't work for the shared case.
 //
-#  define LIBRENDER_SYMEXPORT         // Using static or shared.
-//#  error define LIBRENDER_STATIC or LIBRENDER_SHARED preprocessor macro to signal librender library type being linked
+#    define LIBRENDER_SYMEXPORT // Using static or shared.
+// #  error define LIBRENDER_STATIC or LIBRENDER_SHARED preprocessor macro to signal librender
+// library type being linked
 #endif
