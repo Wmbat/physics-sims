@@ -1,3 +1,0 @@
-# libphyseng
-
-C++ library

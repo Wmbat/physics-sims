@@ -1,3 +1,0 @@
-import libs = libphyseng%lib{physeng}
-
-exe{driver}: {hxx ixx txx cxx}{**} $libs

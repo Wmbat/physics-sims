@@ -1,5 +1,9 @@
 /**
- * Copyright 2023 wmbat
+ * @file librender/librender/vulkan/include.hpp
+ * @author wmbat wmbat-dev@protonmail.com
+ * @date 09/22/2023
+ * @brief Contains helper functions for vulkan and is the central inclusion point for the vulkan library
+ * @copyright Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +56,23 @@ namespace render::vk
     static constexpr bool should_enable_validation_layers = true;
 #endif
 
+    /**
+     * @brief Takes a \ref core::semantic_version and packs it into a single 32 bit integer used by Vulkan to store
+     * version numbers.
+     *
+     * @param[in] The version to pack for Vulkan
+     */
     constexpr auto to_vulkan_version(core::semantic_version const& version) -> std::uint32_t
     {
         return VK_MAKE_API_VERSION(0, version.major, version.minor, version.patch);
     }
 
+    /**
+     * @brief Takes a packed version used by Vulkan and extract the Major, Minor and Patch numbers that are stored
+     * within.
+     *
+     * @param[in] The version to unpack for Vulkan
+     */
     constexpr auto from_vulkan_version(std::uint32_t version) -> core::semantic_version
     {
         return {.major = VK_API_VERSION_MAJOR(version),
@@ -64,5 +80,8 @@ namespace render::vk
                 .patch = VK_API_VERSION_PATCH(version)};
     }
 
+    /**
+     * @brief Makes a \ref std::error_code from a \ref ::vk::Result.
+     */
     auto make_error_code(::vk::Result error_code) -> std::error_code;
 } // namespace render::vk

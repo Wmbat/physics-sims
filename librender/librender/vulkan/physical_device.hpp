@@ -14,35 +14,32 @@
  * limitations under the License.
  */
 
-#pragma once
-
+#include <librender/vulkan/include.hpp>
 #include <librender/vulkan/instance.hpp>
 
-#include <libcore/application_info.hpp>
 #include <libcore/error/error.hpp>
 
 #include <tl/expected.hpp>
 
-#include <spdlog/logger.h>
+#include <range/v3/action/sort.hpp>
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/range/operations.hpp>
+#include <range/v3/view/filter.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
 
-#include <chrono>
-#include <system_error>
+#include <concepts>
+#include <ranges>
 
-namespace render
+namespace render::vk
 {
-    struct system
+    enum struct physical_device_selection_error
     {
-    public:
-        static auto make(core::application_info const& app_info, spdlog::logger& logger)
-            -> tl::expected<system, core::error>;
-
-    private:
-        system(vk::instance&& instance);
-
-    public:
-        void update(std::chrono::milliseconds dt);
-
-    private:
-        vk::instance m_instance;
+        no_physical_devices_found,
+        no_suitable_physical_devices_found
     };
-} // namespace render
+
+    auto make_error_code(physical_device_selection_error error_code) -> std::error_code;
+
+    auto select_physical_device(instance const& instance) -> tl::expected<::vk::PhysicalDevice, core::error>;
+} // namespace render::vk

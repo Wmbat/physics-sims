@@ -1,7 +1,5 @@
 : 1
 location: sims/sph/
-:
-location: libphyseng/
 
 :
 location: libcore/

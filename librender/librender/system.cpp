@@ -16,6 +16,7 @@
 
 #include <librender/system.hpp>
 #include <librender/vulkan/instance.hpp>
+#include <librender/vulkan/physical_device.hpp>
 
 #include <spdlog/logger.h>
 
@@ -26,10 +27,14 @@ namespace render
     auto system::make(core::application_info const& app_info, spdlog::logger& logger)
         -> tl::expected<system, core::error>
     {
-        return vk::instance::make(app_info, logger).transform([](vk::instance) {
-            return system{};
+        return vk::instance::make(app_info, logger).transform([](vk::instance&& instance) {
+            [[maybe_unused]] auto device = vk::select_physical_device(instance);
+
+            return system{std::move(instance)};
         });
     }
+
+    system::system(vk::instance&& instance) : m_instance(std::move(instance)) {}
 
     void system::update(std::chrono::milliseconds) {}
 } // namespace render

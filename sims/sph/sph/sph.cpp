@@ -71,7 +71,7 @@ auto main(int argc, char *argv[]) -> int
 
     if (auto res = render::system::make(app_info, app_logger))
     {
-        auto render_system = res.value();
+        auto& render_system = res.value();
         render_system.update(16ms);
     }
     else

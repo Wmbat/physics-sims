@@ -38,8 +38,7 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE; // NOLINT
 
 namespace
 {
-    auto get_validation_message_type(VkDebugUtilsMessageTypeFlagsEXT messageType)
-        -> std::optional<std::string>
+    auto get_validation_message_type(VkDebugUtilsMessageTypeFlagsEXT messageType) -> std::optional<std::string>
     {
         if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT)
         {
@@ -59,10 +58,10 @@ namespace
         return std::nullopt;
     }
 
-    static VKAPI_ATTR auto VKAPI_CALL debug_callback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data, void* p_user_data) -> VkBool32
+    static VKAPI_ATTR auto VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                     VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                     VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data,
+                                                     void* p_user_data) -> VkBool32
     {
         assert(p_user_data != nullptr); // NOLINT
 
@@ -90,12 +89,16 @@ namespace render::vk::detail
 {
     using namespace std::literals;
 
+    /**
+     * @brief Loads the vulkan symbols using a \ref ::vk::DynamicLoader
+     *
+     * @param[in] logger
+     */
     auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader
     {
         auto loader = ::vk::DynamicLoader{};
 
-        VULKAN_HPP_DEFAULT_DISPATCHER.init(
-            loader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
+        VULKAN_HPP_DEFAULT_DISPATCHER.init(loader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
 
         logger.debug("Vulkan symbols have been loaded.");
 
@@ -112,17 +115,18 @@ namespace render::vk::detail
         return std::string_view{property.extensionName} == "VK_EXT_debug_utils"sv;
     }
 
+    /**
+     * @brief Get the list of validation layers to enable for the vulkan instance.
+     */
     [[nodiscard]] auto get_desired_validation_layers() -> std::vector<char const*>
     {
         auto enabled_layers = std::vector<char const*>{};
         if constexpr (should_enable_validation_layers)
         {
-            auto const result = ::vk::enumerateInstanceLayerProperties();
-            if (result.result == ::vk::Result::eSuccess)
+            auto const [result, properties] = ::vk::enumerateInstanceLayerProperties();
+            if (result == ::vk::Result::eSuccess)
             {
-                auto const layer_props = result.value;
-                if (ranges::find_if(layer_props, is_khr_validation_layer)
-                    != ranges::end(layer_props))
+                if (ranges::find_if(properties, is_khr_validation_layer) != ranges::end(properties))
                 {
                     enabled_layers.push_back("VK_LAYER_KHRONOS_validation");
                 }
@@ -132,17 +136,19 @@ namespace render::vk::detail
         return enabled_layers;
     }
 
+    /**
+     * @brief Get the list of extension to enable for the vulkan instance.
+     */
     [[nodiscard]] auto get_desired_extensions() -> std::vector<char const*>
     {
         auto enabled_exts = std::vector<char const*>{};
 
         if constexpr (should_enable_validation_layers)
         {
-            auto const result = ::vk::enumerateInstanceExtensionProperties();
-            if (result.result == ::vk::Result::eSuccess)
+            auto const [result, properties] = ::vk::enumerateInstanceExtensionProperties();
+            if (result == ::vk::Result::eSuccess)
             {
-                auto const ext_props = result.value;
-                if (ranges::find_if(ext_props, is_debug_utils_ext) != ranges::end(ext_props))
+                if (ranges::find_if(properties, is_debug_utils_ext) != ranges::end(properties))
                 {
                     enabled_exts.push_back("VK_EXT_debug_utils");
                 }
@@ -152,45 +158,41 @@ namespace render::vk::detail
         return enabled_exts;
     }
 
+    /**
+     * @brief Get the version of the local vulkan API implementation and checks if the version is supported.
+     */
     auto get_vulkan_version() -> tl::expected<core::semantic_version, core::error>
     {
         auto const [result, version] = ::vk::enumerateInstanceVersion();
         if (result != ::vk::Result::eSuccess)
         {
-            auto error = core::error{.error_code = vk::make_error_code(result)};
-
-            return tl::unexpected(std::move(error));
+            return tl::unexpected(core::error{.error_code = vk::make_error_code(result)});
         }
 
         auto const unpacked_version = from_vulkan_version(version);
         auto const unpacked_min_version = from_vulkan_version(VK_API_VERSION_1_3);
         if (unpacked_version < unpacked_min_version)
         {
-            auto error = core::error{
+            return tl::unexpected(core::error{
                 .error_code = make_error_code(instance_error::vulkan_version_too_low),
-                .context = fmt::format(
-                    "The most recent version find is {}, but the minimum required version is {}. "
-                    "Please upgrade Vulkan to a newer version.",
-                    unpacked_version, unpacked_min_version)};
-
-            return tl::unexpected(std::move(error));
+                .context = fmt::format("The most recent version found is {}, but the minimum required version is {}. "
+                                       "Please upgrade Vulkan to a newer version.",
+                                       unpacked_version, unpacked_min_version)});
         }
 
         return unpacked_version;
     }
 
-    auto create_vk_instance(core::application_info const& app_info,
-                            core::semantic_version const& vulkan_version, spdlog::logger& logger)
-        -> tl::expected<::vk::UniqueInstance, core::error>
+    auto create_vk_instance(core::application_info const& app_info, core::semantic_version const& vulkan_version,
+                            spdlog::logger& logger) -> tl::expected<::vk::UniqueInstance, core::error>
     {
         auto enabled_layers = get_desired_validation_layers();
         auto enabled_exts = get_desired_extensions();
 
-        auto const vk_info =
-            ::vk::ApplicationInfo{}
-                .setApiVersion(to_vulkan_version(vulkan_version))
-                .setPApplicationName(app_info.name.data())
-                .setApplicationVersion(render::vk::to_vulkan_version(app_info.version));
+        auto const vk_info = ::vk::ApplicationInfo{}
+                                 .setApiVersion(to_vulkan_version(vulkan_version))
+                                 .setPApplicationName(app_info.name.data())
+                                 .setApplicationVersion(render::vk::to_vulkan_version(app_info.version));
         auto const create_info = ::vk::InstanceCreateInfo{}
                                      .setPApplicationInfo(&vk_info)
                                      .setPEnabledLayerNames(enabled_layers)
@@ -198,9 +200,7 @@ namespace render::vk::detail
         auto [result, instance] = ::vk::createInstanceUnique(create_info);
         if (result != ::vk::Result::eSuccess)
         {
-            auto error = core::error{.error_code = vk::make_error_code(result)};
-
-            return tl::unexpected(std::move(error));
+            return tl::unexpected(core::error{.error_code = vk::make_error_code(result)});
         }
 
         VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
@@ -227,19 +227,18 @@ namespace render::vk::detail
             return {};
         }
 
-        auto const create_info =
-            ::vk::DebugUtilsMessengerCreateInfoEXT()
-                .setMessageSeverity(::vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
-                                    | ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
-                                    | ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eError)
-                .setMessageType(::vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-                                | ::vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
-                                | ::vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance)
-                .setPfnUserCallback(debug_callback)
-                .setPUserData(static_cast<void*>(&logger));
+        auto const create_info = ::vk::DebugUtilsMessengerCreateInfoEXT()
+                                     .setMessageSeverity(::vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
+                                                         | ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+                                                         | ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eError)
+                                     .setMessageType(::vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+                                                     | ::vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+                                                     | ::vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance)
+                                     .setPfnUserCallback(debug_callback)
+                                     .setPUserData(static_cast<void*>(&logger));
 
-        auto [result, debug_utils] = instance.createDebugUtilsMessengerEXTUnique(
-            create_info, nullptr, VULKAN_HPP_DEFAULT_DISPATCHER);
+        auto [result, debug_utils] =
+            instance.createDebugUtilsMessengerEXTUnique(create_info, nullptr, VULKAN_HPP_DEFAULT_DISPATCHER);
         if (result == ::vk::Result::eSuccess)
         {
             logger.debug("Vulkan debug utilities have been created.");
@@ -248,9 +247,8 @@ namespace render::vk::detail
         }
         else
         {
-            return tl::unexpected{
-                core::error{.context = "Failed to create the debug utils. There will be no "
-                                       "Vulkan API debug reporting from now on"}};
+            return tl::unexpected{core::error{.context = "Failed to create the debug utils. There will be no "
+                                                         "Vulkan API debug reporting from now on"}};
         }
     }
 } // namespace render::vk::detail
@@ -259,10 +257,7 @@ namespace render::vk
 {
     struct instance_error_category : public std::error_category
     {
-        [[nodiscard]] auto name() const noexcept -> char const* override
-        {
-            return "instance error";
-        }
+        [[nodiscard]] auto name() const noexcept -> char const* override { return "instance error"; }
 
         [[nodiscard]] auto message(int error_code) const noexcept -> std::string override
         {
@@ -292,8 +287,7 @@ namespace render::vk
                     logger.warn("{}", result.error());
                 }
 
-                return render::vk::instance{std::move(loader), std::move(instance),
-                                            std::move(result).value()};
+                return render::vk::instance{std::move(loader), std::move(instance), std::move(result).value()};
             });
     }
 
@@ -302,4 +296,24 @@ namespace render::vk
         m_loader(std::move(loader)),
         m_instance(std::move(instance)), m_debug_utils(std::move(debug_utils))
     {}
+
+    auto instance::operator*() noexcept -> ::vk::Instance&
+    {
+        return m_instance.get();
+    }
+
+    auto instance::operator*() const noexcept -> ::vk::Instance const&
+    {
+        return m_instance.get();
+    }
+
+    auto instance::operator->() noexcept -> ::vk::Instance*
+    {
+        return &m_instance.get();
+    }
+
+    auto instance::operator->() const noexcept -> ::vk::Instance const*
+    {
+        return &m_instance.get();
+    }
 } // namespace render::vk

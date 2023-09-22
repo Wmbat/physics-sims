@@ -1,6 +1,0 @@
-$out_root/
-{
-  include libphyseng/
-}
-
-export $out_root/libphyseng/$import.target

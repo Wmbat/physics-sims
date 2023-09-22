@@ -16,7 +16,11 @@
 
 #pragma once
 
+// Library includes
+
 #include <librender/vulkan/include.hpp>
+
+// External Libraries includes
 
 #include <libcore/application_info.hpp>
 #include <libcore/error/error.hpp>
@@ -25,6 +29,10 @@
 #include <spdlog/logger.h>
 
 #include <tl/expected.hpp>
+
+// Standard library includes
+
+#include <type_traits>
 
 namespace render::vk
 {
@@ -44,6 +52,12 @@ namespace render::vk
     private:
         instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance instance,
                  ::vk::UniqueDebugUtilsMessengerEXT debug_utils);
+
+    public:
+        auto operator*() noexcept -> ::vk::Instance&;
+        auto operator*() const noexcept -> ::vk::Instance const&;
+        auto operator->() noexcept -> ::vk::Instance*;
+        auto operator->() const noexcept -> ::vk::Instance const*;
 
     private:
         ::vk::DynamicLoader m_loader = {};

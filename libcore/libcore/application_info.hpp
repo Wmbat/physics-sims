@@ -1,5 +1,9 @@
 /**
- * Copyright 2023 wmbat
+ * @file libcore/libcore/application_info.hpp
+ * @author wmbat wmbat-dev@protonmail.com
+ * @date 09/22/2023
+ * @brief Contains the information about the user's application
+ * @copyright Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +16,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/**
- * @file libcore/libcore/application_info.hpp
- * @author wmbat wmbat-dev@protonmail.com
- * @date 09/08/2023
- * @brief Contains the information about the user's application
  */
 
 #pragma once
