@@ -24,17 +24,23 @@ namespace
 {
     struct device_rating_pair
     {
-        ::vk::PhysicalDevice device;
+        render::vk::physical_device device;
         int rating = 0;
     };
 
-    auto to_device_rating_pair(std::tuple<::vk::PhysicalDevice, int> input) -> device_rating_pair
+    auto to_device_rating_pair(std::tuple<render::vk::physical_device, int> input) -> device_rating_pair
     {
         return device_rating_pair{.device = std::get<0>(input), .rating = std::get<1>(input)};
     }
+
     auto is_device_supported(device_rating_pair pair) -> bool
     {
         return pair.rating >= 0;
+    }
+
+    auto populate_physical_device(::vk::PhysicalDevice device) -> render::vk::physical_device
+    {
+        return {.handle = device, .properties = device.getProperties2(), .memory_properties = {}};
     }
 } // namespace
 
@@ -57,12 +63,46 @@ namespace render::vk
         return {static_cast<int>(error_code), error_category};
     }
 
-    auto rate_physical_device(::vk::PhysicalDevice /*device*/) -> int
+    auto rate_physical_device_type(::vk::PhysicalDeviceProperties2 properties) -> int
     {
-        return 1;
+        using enum ::vk::PhysicalDeviceType;
+
+        static constexpr int discrete_gpu_grade = 100;
+        static constexpr int integrated_gpu_grade = 70;
+        static constexpr int virtual_gpu_grade = 30;
+
+        auto type = properties.properties.deviceType;
+        if (type == eDiscreteGpu)
+        {
+            return discrete_gpu_grade;
+        }
+        else if (type == eIntegratedGpu)
+        {
+            return integrated_gpu_grade;
+        }
+        else if (type == eVirtualGpu)
+        {
+            return virtual_gpu_grade;
+        }
+        else
+        {
+            return -1;
+        }
     }
 
-    auto select_physical_device(instance const& instance) -> tl::expected<::vk::PhysicalDevice, core::error>
+    auto rate_physical_device(physical_device device) -> int
+    {
+        auto const device_type_grade = rate_physical_device_type(device.properties);
+
+        return device_type_grade;
+    }
+
+    auto physical_device::get_name() const noexcept -> std::string_view
+    {
+        return {properties.properties.deviceName};
+    }
+
+    auto select_physical_device(instance const& instance) -> tl::expected<physical_device, core::error>
     {
         using enum physical_device_selection_error;
 
@@ -79,8 +119,11 @@ namespace render::vk
 
         // clang-format off
 
-        auto const ratings = devices | ranges::views::transform(rate_physical_device);
-        auto const device_rating_pairs = ranges::views::zip(devices, ratings)
+        auto const populated_devices = devices 
+                                     | ranges::views::transform(populate_physical_device) 
+                                     | ranges::to<std::vector>();
+        auto const ratings = populated_devices | ranges::views::transform(rate_physical_device);
+        auto const device_rating_pairs = ranges::views::zip(populated_devices, ratings)
                                        | ranges::views::transform(to_device_rating_pair)
                                        | ranges::views::filter(is_device_supported) 
                                        | ranges::to<std::vector>();

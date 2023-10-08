@@ -89,22 +89,6 @@ namespace render::vk::detail
 {
     using namespace std::literals;
 
-    /**
-     * @brief Loads the vulkan symbols using a \ref ::vk::DynamicLoader
-     *
-     * @param[in] logger
-     */
-    auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader
-    {
-        auto loader = ::vk::DynamicLoader{};
-
-        VULKAN_HPP_DEFAULT_DISPATCHER.init(loader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
-
-        logger.debug("Vulkan symbols have been loaded.");
-
-        return loader;
-    }
-
     auto is_khr_validation_layer(::vk::LayerProperties const& property) -> bool
     {
         return std::string_view{property.layerName} == "VK_LAYER_KHRONOS_validation"sv;
@@ -247,7 +231,8 @@ namespace render::vk::detail
         }
         else
         {
-            return tl::unexpected{core::error{.context = "Failed to create the debug utils. There will be no "
+            return tl::unexpected{core::error{.error_code = make_error_code(result),
+                                              .context = "Failed to create the debug utils. There will be no "
                                                          "Vulkan API debug reporting from now on"}};
         }
     }
@@ -275,7 +260,6 @@ namespace render::vk
     auto instance::make(core::application_info const& app_info, spdlog::logger& logger)
         -> tl::expected<instance, core::error>
     {
-        auto loader = detail::load_vulkan_symbols(logger);
         return detail::get_vulkan_version()
             .and_then([&](core::semantic_version version) {
                 return detail::create_vk_instance(app_info, version, logger);
@@ -287,13 +271,11 @@ namespace render::vk
                     logger.warn("{}", result.error());
                 }
 
-                return render::vk::instance{std::move(loader), std::move(instance), std::move(result).value()};
+                return render::vk::instance{std::move(instance), std::move(result).value()};
             });
     }
 
-    instance::instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance instance,
-                       ::vk::UniqueDebugUtilsMessengerEXT debug_utils) :
-        m_loader(std::move(loader)),
+    instance::instance(::vk::UniqueInstance&& instance, ::vk::UniqueDebugUtilsMessengerEXT&& debug_utils) :
         m_instance(std::move(instance)), m_debug_utils(std::move(debug_utils))
     {}
 

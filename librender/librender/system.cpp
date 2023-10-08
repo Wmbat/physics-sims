@@ -16,25 +16,34 @@
 
 #include <librender/system.hpp>
 #include <librender/vulkan/instance.hpp>
+#include <librender/vulkan/loader.hpp>
 #include <librender/vulkan/physical_device.hpp>
 
 #include <spdlog/logger.h>
 
 #include <chrono>
+#include <vulkan/vulkan.hpp>
 
 namespace render
 {
     auto system::make(core::application_info const& app_info, spdlog::logger& logger)
         -> tl::expected<system, core::error>
     {
-        return vk::instance::make(app_info, logger).transform([](vk::instance&& instance) {
-            [[maybe_unused]] auto device = vk::select_physical_device(instance);
+        return vk::instance::make(app_info, logger)
+            .and_then([&](vk::instance&& instance) -> tl::expected<system, core::error> {
+                auto device = vk::select_physical_device(instance);
+                if (not device.has_value())
+                {
+                    return tl::unexpected{std::move(device).error()};
+                }
 
-            return system{std::move(instance)};
-        });
+                logger.info("Using gpu \"{}\"", device->get_name());
+
+                return system{std::move(instance)};
+            });
     }
 
-    system::system(vk::instance&& instance) : m_instance(std::move(instance)) {}
+    system::system(vk::instance&& instance) : m_instance{std::move(instance)} {}
 
     void system::update(std::chrono::milliseconds) {}
 } // namespace render

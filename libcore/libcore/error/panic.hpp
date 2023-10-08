@@ -62,6 +62,16 @@ namespace core
         std::source_location loc;
     };
 
+    /**
+     * @brief description
+     *
+     * Example usage:
+     * @code{.cpp}
+     * 
+     * @endcode
+     *
+     * @param[in] str
+     */
     [[noreturn]] inline void panic(panic_dynamic_string_view str) noexcept
     {
         auto const message =
@@ -69,6 +79,19 @@ namespace core
         detail::panic_impl(message);
     }
 
+    /**
+     * @brief description
+     *
+     * Example usage:
+     * @code{.cpp}
+     *
+     * @endcode
+     *
+     * @param[in] fmt The format to use when formatting the arguments
+     * @param[in] args The values to format.
+     *
+     * @tparam Args The different argument types to format.
+     */
     template<class... Args>
     [[noreturn]] void panic(panic_format<std::type_identity_t<Args>...> fmt,
                             Args&&... args) noexcept

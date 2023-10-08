@@ -41,5 +41,14 @@ namespace render::vk
 
     auto make_error_code(physical_device_selection_error error_code) -> std::error_code;
 
-    auto select_physical_device(instance const& instance) -> tl::expected<::vk::PhysicalDevice, core::error>;
+    struct physical_device
+    {
+        ::vk::PhysicalDevice handle;
+        ::vk::PhysicalDeviceProperties2 properties;
+        ::vk::PhysicalDeviceMemoryProperties memory_properties;
+
+        [[nodiscard]] auto get_name() const noexcept -> std::string_view;
+    };
+
+    auto select_physical_device(instance const& instance) -> tl::expected<physical_device, core::error>;
 } // namespace render::vk

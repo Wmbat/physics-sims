@@ -17,6 +17,7 @@
 #pragma once
 
 #include <librender/vulkan/instance.hpp>
+#include <librender/vulkan/loader.hpp>
 
 #include <libcore/application_info.hpp>
 #include <libcore/error/error.hpp>

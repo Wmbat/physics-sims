@@ -1,9 +1,5 @@
 /**
- * @file libcore/libcore/core.hpp
- * @author wmbat wmbat-dev@protonmail.com
- * @date 10/08/2023
- * @brief Single file to include all headers within libcore
- * @copyright Copyright 2023 wmbat
+ * Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +14,18 @@
  * limitations under the License.
  */
 
+#include <librender/vulkan/loader.hpp>
 
-#pragma once
+namespace render::vk
+{
+    auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader
+    {
+        auto loader = ::vk::DynamicLoader{};
 
-#include <libcore/application_info.hpp>
-#include <libcore/core.hpp>
-#include <libcore/error/panic.hpp>
-#include <libcore/export.hpp>
-#include <libcore/semantic_version.hpp>
+        VULKAN_HPP_DEFAULT_DISPATCHER.init(loader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
+
+        logger.debug("Vulkan symbols have been loaded.");
+
+        return loader;
+    }
+} // namespace render::vk

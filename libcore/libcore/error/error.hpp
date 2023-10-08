@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <system_error>
 
@@ -29,16 +30,48 @@ namespace core
 {
     /**
      * @brief A class that holds information about an error that occured in the code.
+     *
+     * @remark This struct should **NOT** be used for exception handling !
+     *
+     * Example usage:
+     * @code{.cpp}
+     * auto divide_int_by(int divident, int divisor) -> tl::expected<int, core::error>
+     * {
+     *     if (divider == 0)
+     *     {
+     *         // We create the error, giving it a message of what went wrong.
+     *         auto error = core::error
+     *         {
+     *             .error_code = {},
+     *             .context = "cannot divide by 0"
+     *         };
+     *
+     *         return tl::unexpected(error);
+     *     }
+     *
+     *     return dividend / divisor;
+     * }
+     * @endcode
      */
     struct error
     {
-        std::error_code error_code; ///< The actual error code that was emitted by the code.
-        std::string context;        ///< Context message to provide additional information in logs.
+        std::optional<std::error_code> error_code; ///< The actual error code that was emitted by the code.
+        std::string context;                       ///< Context message to provide additional information in logs.
     };
 } // namespace core
 
 /**
- * @brief Custom formatter to convert an \ref core::error_code to string.
+ * @brief Custom formatter to convert an core::error to string.
+ *
+ * Example usage:
+ * @code{.cpp}
+ * auto division_result = divide_int_by(10, 0);
+ * if (!division_result)
+ * {
+ *     fmt::print("{}", division_result.error());
+ *     // This should print "cannot divide by 0"
+ * }
+ * @endcode
  */
 template<>
 struct fmt::formatter<core::error>
@@ -49,7 +82,14 @@ struct fmt::formatter<core::error>
     auto format(core::error const& error, FormatContext& ctx)
     {
         auto const& error_code = error.error_code;
-        return fmt::format_to(ctx.out(), "{0} ({1}: {2})", error.context, error_code.category().name(),
-                              error_code.message());
+        if (error_code)
+        {
+            return fmt::format_to(ctx.out(), "{0} ({1}: {2}-{3})", error.context, error_code->category().name(),
+                                  error_code->value(), error_code->message());
+        }
+        else
+        {
+            return fmt::format_to(ctx.out(), "{0}", error.context);
+        }
     };
 };

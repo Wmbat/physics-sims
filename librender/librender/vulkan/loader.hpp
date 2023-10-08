@@ -1,8 +1,8 @@
 /**
- * @file libcore/libcore/core.hpp
+ * @file librender/librender/vulkan/loader.hpp
  * @author wmbat wmbat-dev@protonmail.com
- * @date 10/08/2023
- * @brief Single file to include all headers within libcore
+ * @date 09/22/2023
+ * @brief Implements functionality to load vulkan handles at runtime.
  * @copyright Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,16 @@
  * limitations under the License.
  */
 
+#include <librender/vulkan/include.hpp>
 
-#pragma once
+#include <spdlog/logger.h>
 
-#include <libcore/application_info.hpp>
-#include <libcore/core.hpp>
-#include <libcore/error/panic.hpp>
-#include <libcore/export.hpp>
-#include <libcore/semantic_version.hpp>
+namespace render::vk
+{
+    /**
+     * @brief Loads the vulkan symbols using a \ref ::vk::DynamicLoader
+     *
+     * @param[in] logger
+     */
+    auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader;
+} // namespace render::vk

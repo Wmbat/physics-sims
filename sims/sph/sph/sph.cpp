@@ -69,6 +69,7 @@ auto main(int argc, char *argv[]) -> int
     auto const app_info = core::application_info{.name = args[0], .version = get_version()};
     auto app_logger = create_logger(app_info.name);
 
+    auto loader = render::vk::load_vulkan_symbols(app_logger);
     if (auto res = render::system::make(app_info, app_logger))
     {
         auto& render_system = res.value();

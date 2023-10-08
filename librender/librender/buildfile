@@ -1,9 +1,10 @@
 intf_libs = # Interface dependencies.
 import intf_libs += libcore%lib{core}
 import intf_libs += spdlog%lib{spdlog}
+import intf_libs += libvulkan-meta%lib{vulkan}
+
 impl_libs = # Implementation dependencies.
 import impl_libs += magic_enum%lib{magic_enum}
-#import xxxx_libs += libhello%lib{hello}
 
 lib{render}: {hxx ixx txx cxx}{** -version} hxx{version} $impl_libs $intf_libs
 
