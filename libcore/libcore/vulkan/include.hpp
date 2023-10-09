@@ -1,5 +1,5 @@
 /**
- * @file librender/librender/vulkan/include.hpp
+ * @file libcore/libcore/vulkan/include.hpp
  * @author wmbat wmbat-dev@protonmail.com
  * @date 09/22/2023
  * @brief Contains helper functions for vulkan and is the central inclusion point for the vulkan library
@@ -48,7 +48,7 @@
 
 #include <system_error>
 
-namespace render::vk
+namespace core::vk
 {
 #if defined(NDEBUG)
     static constexpr bool should_enable_validation_layers = false;

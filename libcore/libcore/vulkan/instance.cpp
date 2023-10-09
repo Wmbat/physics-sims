@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#include <librender/vulkan/instance.hpp>
+#include <libcore/vulkan/instance.hpp>
 
-#include <librender/vulkan/include.hpp>
+#include <libcore/vulkan/include.hpp>
+#include <libcore/vulkan/loader.hpp>
 
 #include <libcore/application_info.hpp>
 #include <libcore/semantic_version.hpp>
@@ -85,7 +86,7 @@ namespace
     }
 } // namespace
 
-namespace render::vk::detail
+namespace core::vk::detail
 {
     using namespace std::literals;
 
@@ -176,7 +177,7 @@ namespace render::vk::detail
         auto const vk_info = ::vk::ApplicationInfo{}
                                  .setApiVersion(to_vulkan_version(vulkan_version))
                                  .setPApplicationName(app_info.name.data())
-                                 .setApplicationVersion(render::vk::to_vulkan_version(app_info.version));
+                                 .setApplicationVersion(core::vk::to_vulkan_version(app_info.version));
         auto const create_info = ::vk::InstanceCreateInfo{}
                                      .setPApplicationInfo(&vk_info)
                                      .setPEnabledLayerNames(enabled_layers)
@@ -189,7 +190,7 @@ namespace render::vk::detail
 
         VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
 
-        logger.debug("Vulkan instance has been created. Using version {}.", vulkan_version);
+        logger.debug("Vulkan instance has been created.");
 
         return std::move(instance);
     }
@@ -197,7 +198,7 @@ namespace render::vk::detail
     auto create_vk_debug_utils(::vk::Instance instance, spdlog::logger& logger)
         -> tl::expected<::vk::UniqueDebugUtilsMessengerEXT, core::error>
     {
-        if constexpr (not render::vk::should_enable_validation_layers)
+        if constexpr (not core::vk::should_enable_validation_layers)
         {
             return {};
         }
@@ -236,9 +237,9 @@ namespace render::vk::detail
                                                          "Vulkan API debug reporting from now on"}};
         }
     }
-} // namespace render::vk::detail
+} // namespace core::vk::detail
 
-namespace render::vk
+namespace core::vk
 {
     struct instance_error_category : public std::error_category
     {
@@ -260,8 +261,10 @@ namespace render::vk
     auto instance::make(core::application_info const& app_info, spdlog::logger& logger)
         -> tl::expected<instance, core::error>
     {
+        auto loader = load_vulkan_symbols(logger);
         return detail::get_vulkan_version()
-            .and_then([&](core::semantic_version version) {
+            .and_then([&](semantic_version version) {
+                logger.info("Using Vulkan version {}", version);
                 return detail::create_vk_instance(app_info, version, logger);
             })
             .transform([&](::vk::UniqueInstance instance) {
@@ -271,11 +274,13 @@ namespace render::vk
                     logger.warn("{}", result.error());
                 }
 
-                return render::vk::instance{std::move(instance), std::move(result).value()};
+                return core::vk::instance{std::move(loader), std::move(instance), std::move(result).value()};
             });
     }
 
-    instance::instance(::vk::UniqueInstance&& instance, ::vk::UniqueDebugUtilsMessengerEXT&& debug_utils) :
+    instance::instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance&& instance,
+                       ::vk::UniqueDebugUtilsMessengerEXT&& debug_utils) :
+        m_loader(std::move(loader)),
         m_instance(std::move(instance)), m_debug_utils(std::move(debug_utils))
     {}
 
@@ -298,4 +303,4 @@ namespace render::vk
     {
         return &m_instance.get();
     }
-} // namespace render::vk
+} // namespace core::vk

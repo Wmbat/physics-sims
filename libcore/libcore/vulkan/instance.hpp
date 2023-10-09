@@ -1,5 +1,5 @@
 /**
- * @file librender/librender/vulkan/instance.hpp
+ * @file libcore/libcore/vulkan/instance.hpp
  * @author wmbat wmbat-dev@protonmail.com
  * @brief Implements a simple class to initialize vulkan.
  * @copyright Copyright 2023 wmbat
@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 // Library includes
 
-#include <librender/vulkan/include.hpp>
+#include <libcore/vulkan/include.hpp>
 
 // External Libraries includes
 
@@ -38,7 +37,7 @@
 
 #include <type_traits>
 
-namespace render::vk
+namespace core::vk
 {
     /**
      * @brief Represents an error when creating a render::vk::instance
@@ -70,11 +69,12 @@ namespace render::vk
          *
          * @returns A valid render::vk::instance object or a core::error if something when wrong.
          */
-        static auto make(core::application_info const& app_info, spdlog::logger& logger)
+        static auto make(application_info const& app_info, spdlog::logger& logger)
             -> tl::expected<instance, core::error>;
 
     private:
-        instance(::vk::UniqueInstance&& instance, ::vk::UniqueDebugUtilsMessengerEXT&& debug_utils);
+        instance(::vk::DynamicLoader&& loader, ::vk::UniqueInstance&& instance,
+                 ::vk::UniqueDebugUtilsMessengerEXT&& debug_utils);
 
     public:
         auto operator*() noexcept -> ::vk::Instance&;
@@ -83,7 +83,8 @@ namespace render::vk
         auto operator->() const noexcept -> ::vk::Instance const*;
 
     private:
+        ::vk::DynamicLoader m_loader = {};
         ::vk::UniqueInstance m_instance = {};
         ::vk::UniqueDebugUtilsMessengerEXT m_debug_utils = {};
     };
-} // namespace render::vk
+} // namespace core::vk

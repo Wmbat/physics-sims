@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <librender/vulkan/include.hpp>
+#include <libcore/vulkan/include.hpp>
 
 #include <magic_enum.hpp>
 
-namespace render::vk
+namespace core::vk
 {
     struct vulkan_error_category : public std::error_category
     {
@@ -35,4 +35,4 @@ namespace render::vk
         static auto error_category = vulkan_error_category{};
         return std::error_code{static_cast<int>(error_code), error_category};
     }
-} // namespace render::vk
+} // namespace core::vk

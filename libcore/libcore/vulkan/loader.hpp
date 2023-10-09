@@ -1,5 +1,5 @@
 /**
- * @file librender/librender/vulkan/loader.hpp
+ * @file libcore/libcore/vulkan/loader.hpp
  * @author wmbat wmbat-dev@protonmail.com
  * @date 09/22/2023
  * @brief Implements functionality to load vulkan handles at runtime.
@@ -18,11 +18,11 @@
  * limitations under the License.
  */
 
-#include <librender/vulkan/include.hpp>
+#include <libcore/vulkan/include.hpp>
 
 #include <spdlog/logger.h>
 
-namespace render::vk
+namespace core::vk
 {
     /**
      * @brief Loads the vulkan symbols using a \ref ::vk::DynamicLoader

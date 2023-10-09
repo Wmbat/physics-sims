@@ -13,6 +13,4 @@ depends: * build2 >= 0.16.0
 depends: * bpkg >= 0.16.0
 
 depends: libcore >= 0.0.0
-depends: spdlog ^1.10.0
 depends: magic_enum ^0.9.1
-depends: libvulkan-meta ^1.0.0

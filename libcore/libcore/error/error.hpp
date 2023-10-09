@@ -29,9 +29,10 @@
 namespace core
 {
     /**
-     * @brief A class that holds information about an error that occured in the code.
-     *
-     * @remark This struct should **NOT** be used for exception handling !
+     * @brief Represents the general idea of an error.
+     * @details It contains optional information about the error code that caused the error as well as a string that
+     * contains contextual information about the error.
+     * @warning This struct should **NOT** be used for exception handling !
      *
      * Example usage:
      * @code{.cpp}

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <librender/vulkan/loader.hpp>
+#include <libcore/vulkan/loader.hpp>
 
-namespace render::vk
+namespace core::vk
 {
     auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader
     {

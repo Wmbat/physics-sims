@@ -15,9 +15,10 @@
  */
 
 #include <librender/system.hpp>
-#include <librender/vulkan/instance.hpp>
-#include <librender/vulkan/loader.hpp>
-#include <librender/vulkan/physical_device.hpp>
+
+#include <libcore/vulkan/instance.hpp>
+#include <libcore/vulkan/loader.hpp>
+#include <libcore/vulkan/physical_device.hpp>
 
 #include <spdlog/logger.h>
 
@@ -29,9 +30,9 @@ namespace render
     auto system::make(core::application_info const& app_info, spdlog::logger& logger)
         -> tl::expected<system, core::error>
     {
-        return vk::instance::make(app_info, logger)
-            .and_then([&](vk::instance&& instance) -> tl::expected<system, core::error> {
-                auto device = vk::select_physical_device(instance);
+        return core::vk::instance::make(app_info, logger)
+            .and_then([&](core::vk::instance&& instance) -> tl::expected<system, core::error> {
+                auto device = core::vk::select_physical_device(instance);
                 if (not device.has_value())
                 {
                     return tl::unexpected{std::move(device).error()};
@@ -43,7 +44,7 @@ namespace render
             });
     }
 
-    system::system(vk::instance&& instance) : m_instance{std::move(instance)} {}
+    system::system(core::vk::instance&& instance) : m_instance{std::move(instance)} {}
 
     void system::update(std::chrono::milliseconds) {}
 } // namespace render

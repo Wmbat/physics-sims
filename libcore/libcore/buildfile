@@ -2,8 +2,11 @@ intf_libs = # Interface dependencies.
 import intf_libs += fmt%lib{fmt}
 import intf_libs += range-v3%lib{range-v3}
 import intf_libs += tl-expected%lib{tl-expected}
+import intf_libs += libvulkan-meta%lib{vulkan}
+import intf_libs += spdlog%lib{spdlog}
+
 impl_libs = # Implementation dependencies.
-#import xxxx_libs += libhello%lib{hello}
+import impl_libs += magic_enum%lib{magic_enum}
 
 lib{core}: {hxx ixx txx cxx}{** -version} hxx{version} $impl_libs $intf_libs
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <librender/vulkan/physical_device.hpp>
+#include <libcore/vulkan/physical_device.hpp>
 
 #include <magic_enum.hpp>
 
@@ -24,11 +24,11 @@ namespace
 {
     struct device_rating_pair
     {
-        render::vk::physical_device device;
+        core::vk::physical_device device;
         int rating = 0;
     };
 
-    auto to_device_rating_pair(std::tuple<render::vk::physical_device, int> input) -> device_rating_pair
+    auto to_device_rating_pair(std::tuple<core::vk::physical_device, int> input) -> device_rating_pair
     {
         return device_rating_pair{.device = std::get<0>(input), .rating = std::get<1>(input)};
     }
@@ -38,13 +38,13 @@ namespace
         return pair.rating >= 0;
     }
 
-    auto populate_physical_device(::vk::PhysicalDevice device) -> render::vk::physical_device
+    auto populate_physical_device(::vk::PhysicalDevice device) -> core::vk::physical_device
     {
         return {.handle = device, .properties = device.getProperties2(), .memory_properties = {}};
     }
 } // namespace
 
-namespace render::vk
+namespace core::vk
 {
     struct physical_device_selection_error_category : public std::error_category
     {
@@ -139,4 +139,4 @@ namespace render::vk
 
         return it->device;
     }
-} // namespace render::vk
+} // namespace core::vk

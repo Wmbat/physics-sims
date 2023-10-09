@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include <librender/vulkan/instance.hpp>
-#include <librender/vulkan/loader.hpp>
+#include <libcore/vulkan/instance.hpp>
 
 #include <libcore/application_info.hpp>
 #include <libcore/error/error.hpp>
@@ -38,12 +37,12 @@ namespace render
             -> tl::expected<system, core::error>;
 
     private:
-        system(vk::instance&& instance);
+        system(core::vk::instance&& instance);
 
     public:
         void update(std::chrono::milliseconds dt);
 
     private:
-        vk::instance m_instance;
+        core::vk::instance m_instance;
     };
 } // namespace render
