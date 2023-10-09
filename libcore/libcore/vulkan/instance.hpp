@@ -41,6 +41,7 @@ namespace core::vk
 {
     /**
      * @brief Represents an error when creating a render::vk::instance
+     * @since 0.1.0
      */
     enum struct instance_error
     {
@@ -49,6 +50,7 @@ namespace core::vk
 
     /**
      * @brief Take a render::vk::instance_error enum and transforms it into a general std::error_code.
+     * @since 0.1.0
      *
      * @param[in] error_code
      */
@@ -56,6 +58,7 @@ namespace core::vk
 
     /**
      * @brief Test
+     * @since 0.1.0
      */
     struct instance
     {
@@ -63,6 +66,7 @@ namespace core::vk
         /**
          * @brief Creates a instance to the vulkan API, setting up the necessary extensions, validation and debug
          * messaging as needed.
+         * @since 0.1.0
          *
          * @param[in] app_info The information about the client's application.
          * @param[in] logger The logger used for logging informational messages.

@@ -37,6 +37,7 @@ namespace core::vk
 {
     /**
      * @brief Represents an error when selecting a render::vk::physical_device.
+     * @since 0.1.0
      */
     enum struct physical_device_selection_error
     {
@@ -46,8 +47,9 @@ namespace core::vk
 
     /**
      * @brief Wraps a render::vk::physical_device_selection_error in a std::error_code for portable error handling.
+     * @since 0.1.0
      *
-     * @param[in] error_code The error code to wrap.
+     * @param[in] error_code The error code to wrap. 
      */
     auto make_error_code(physical_device_selection_error error_code) -> std::error_code;
 
@@ -59,16 +61,18 @@ namespace core::vk
 
         /**
          * @brief Get the name of the physical device.
+         * @since 0.1.0
          */
         [[nodiscard]] auto get_name() const noexcept -> std::string_view;
     };
 
     /**
      * @brief Select the best suited physical device found on the client system.
+     * @since 0.1.0
      *
      * @param[in] instance The instance that was used to initialize vulkan.
      *
      * @returns A valid handle to a physical device or an error detailing what went wrong.
      */
     auto select_physical_device(instance const& instance) -> tl::expected<physical_device, core::error>;
-} // namespace render::vk
+} // namespace core::vk

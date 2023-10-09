@@ -57,8 +57,9 @@ namespace core::vk
 #endif
 
     /**
-     * @brief Takes a \ref core::semantic_version and packs it into a single 32 bit integer used by Vulkan to store
+     * @brief Takes a core::semantic_version and packs it into a single 32 bit integer used by Vulkan to store
      * version numbers.
+     * @since 0.1.0
      *
      * @param[in] The version to pack for Vulkan
      */
@@ -70,6 +71,7 @@ namespace core::vk
     /**
      * @brief Takes a packed version used by Vulkan and extract the Major, Minor and Patch numbers that are stored
      * within.
+     * @since 0.1.0
      *
      * @param[in] The version to unpack for Vulkan
      */
@@ -81,7 +83,8 @@ namespace core::vk
     }
 
     /**
-     * @brief Makes a \ref std::error_code from a \ref ::vk::Result.
+     * @brief Makes a std::error_code from a ::vk::Result.
+     * @since 0.1.0
      */
     auto make_error_code(::vk::Result error_code) -> std::error_code;
-} // namespace render::vk
+} // namespace core::vk

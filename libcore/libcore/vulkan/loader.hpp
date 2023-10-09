@@ -26,8 +26,9 @@ namespace core::vk
 {
     /**
      * @brief Loads the vulkan symbols using a \ref ::vk::DynamicLoader
+     * since 0.1.0
      *
      * @param[in] logger
      */
     auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader;
-} // namespace render::vk
+} // namespace core::vk
