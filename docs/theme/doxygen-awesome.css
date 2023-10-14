@@ -54,7 +54,8 @@ html {
     /* default box shadow used for raising an element above the normal content. Used in dropdowns, Searchresult, ... */
     --box-shadow: 0 2px 8px 0 rgba(0,0,0,.075);
 
-    --odd-color: rgba(0,0,0,.028);
+    --even-color: #363a4e;
+    --odd-color: #3f445b;
 
     /* font-families. will affect all text on the website
      * font-family: the normal font for text, headlines, menus
@@ -78,12 +79,12 @@ html {
     --warning-color: #f8d1cc;
     --warning-color-dark: #b61825;
     --warning-color-darker: #75070f;
-    --note-color: #faf3d8;
-    --note-color-dark: #f3a600;
-    --note-color-darker: #5f4204;
-    --todo-color: #e4f3ff;
-    --todo-color-dark: #1879C4;
-    --todo-color-darker: #274a5c;
+    --note-color: #e4f3ff;
+    --note-color-dark: #1879C4;
+    --note-color-darker: #274a5c;
+    --todo-color: #f3a600;
+    --todo-color-dark: #faf3d8;
+    --todo-color-darker: #5f4204;
     --deprecated-color: #ecf0f3;
     --deprecated-color-dark: #5b6269;
     --deprecated-color-darker: #43454a;
@@ -185,7 +186,8 @@ html {
 
         --box-shadow: 0 2px 8px 0 rgba(0,0,0,.30);
 
-        --odd-color: rgba(100,100,100,.06);
+        --even-color: #363a4e;
+        --odd-color: #3f445b;
 
         --menu-selected-background: rgba(0,0,0,.4);
 
@@ -202,32 +204,32 @@ html {
         --blockquote-background: #222325;
         --blockquote-foreground: #7e8c92;
 
-        --warning-color: #2e1917;
-        --warning-color-dark: #ad2617;
-        --warning-color-darker: #f5b1aa;
-        --note-color: #3b2e04;
-        --note-color-dark: #f1b602;
-        --note-color-darker: #ceb670;
-        --todo-color: #163750;
-        --todo-color-dark: #C180D7;
-        --todo-color-darker: #dcf0fa;
+        --warning-color: #55393d;
+        --warning-color-dark: #ec7279;
+        --warning-color-darker: #FFFFFF;
+        --note-color: #354157;
+        --note-color-dark: #6cb6eb;
+        --note-color-darker: #FFFFFF;
+        --todo-color: #432c4a;
+        --todo-color-dark: #d38aea;
+        --todo-color-darker: #FFFFFF;
         --deprecated-color: #2e323b;
         --deprecated-color-dark: #738396;
-        --deprecated-color-darker: #abb0bd;
-        --bug-color: #2a2536;
-        --bug-color-dark: #7661b3;
-        --bug-color-darker: #ae9ed6;
-        --invariant-color: #303a35;
-        --invariant-color-dark: #76ce96;
-        --invariant-color-darker: #cceed5;
+        --deprecated-color-darker: #FFFFFF;
+        --bug-color: #673417;
+        --bug-color-dark: #f87c37;
+        --bug-color-darker: #FFFFFF;
+        --invariant-color: #394634;
+        --invariant-color-dark: #a0c980;
+        --invariant-color-darker: #FFFFFF;
 
         --fragment-background: #464D69;
         --fragment-foreground: #FFFFFF;
-        --fragment-keyword: #cc99cd;
+        --fragment-keyword: #d38aea;
         --fragment-keywordtype: #ab99cd;
-        --fragment-keywordflow: #e08000;
-        --fragment-token: #7ec699;
-        --fragment-comment: #999999;
+        --fragment-keywordflow: #d38aea;
+        --fragment-token: #a0c980;
+        --fragment-comment: #7e8294;
         --fragment-link: #98c0e3;
         --fragment-preprocessor: #65cabe;
         --fragment-linenumber-color: #595D6E;
@@ -246,7 +248,8 @@ html.dark-mode {
 
     --box-shadow: 0 2px 8px 0 rgba(0,0,0,.30);
 
-    --odd-color: rgba(100,100,100,.06);
+    --even-color: #363a4e;
+    --odd-color: #3f445b;
 
     --menu-selected-background: rgba(0,0,0,.4);
 
@@ -1744,6 +1747,10 @@ table.directory td.desc {
 }
 
 table.directory tr.even {
+    background-color: var(--even-color);
+}
+
+table.directory tr.odd {
     background-color: var(--odd-color);
 }
 
