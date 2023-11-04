@@ -28,4 +28,4 @@ namespace core::vk
 
         return loader;
     }
-} // namespace render::vk
+} // namespace core::vk

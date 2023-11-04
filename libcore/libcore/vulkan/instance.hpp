@@ -23,8 +23,6 @@
 
 #include <libcore/vulkan/include.hpp>
 
-// External Libraries includes
-
 #include <libcore/application_info.hpp>
 #include <libcore/error/error.hpp>
 #include <libcore/semantic_version.hpp>
@@ -32,8 +30,6 @@
 #include <spdlog/logger.h>
 
 #include <tl/expected.hpp>
-
-// Standard library includes
 
 #include <type_traits>
 

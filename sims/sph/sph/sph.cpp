@@ -15,24 +15,41 @@
  */
 
 #include <sph/core.hpp>
-#include <sph/version.hpp>
 
 #include <libcore/application_info.hpp>
 #include <libcore/core.hpp>
 #include <libcore/error/panic.hpp>
-#include <libcore/semantic_version.hpp>
+#include <libcore/error/error.hpp>
+
 #include <librender/system.hpp>
 
+#include <fmt/core.h>
+
 #include <spdlog/logger.h>
+#include <spdlog/common.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/details/console_globals.h>
+#include <spdlog/details/file_helper-inl.h>
+#include <spdlog/sinks/ansicolor_sink-inl.h>
+#include <spdlog/sinks/ansicolor_sink.h>
+#include <spdlog/sinks/base_sink-inl.h>
+#include <spdlog/sinks/basic_file_sink-inl.h>
+#include <spdlog/sinks/sink-inl.h>
 
 #include <range/v3/range/conversion.hpp>
+#include <range/v3/range/primitives.hpp>
 #include <range/v3/view/span.hpp>
-#include <range/v3/view/tail.hpp>
 
+#include <tl/expected.hpp>
+
+#include <string>
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
+#include <mutex>
+#include <string_view>
+#include <vector>
 
 using namespace std::literals::chrono_literals;
 
@@ -44,8 +61,7 @@ namespace
         console_sink->set_level(spdlog::level::trace);
         console_sink->set_pattern("[%n] [%^%l%$] %v");
 
-        auto file_sink =
-            std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{name} + ".logs", true);
+        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{name} + ".logs", true);
         file_sink->set_pattern("[%H:%M:%S.%f] [%n] [%^%l%$] %v");
         file_sink->set_level(spdlog::level::trace);
 
@@ -56,7 +72,7 @@ namespace
     }
 } // namespace
 
-auto main(int argc, char *argv[]) -> int
+auto main(int argc, char* argv[]) -> int
 {
     auto const args = ranges::span{argv, argc} | ranges::to<std::vector<std::string_view>>;
 

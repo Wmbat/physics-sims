@@ -29,13 +29,22 @@ namespace core
 {
     /**
      * @brief Represent a format convention for determining a version encoded using a major, minor
-     * and patch
+     * and patch.
      */
     struct semantic_version
     {
-        std::uint32_t major; //< The major number of the version
-        std::uint32_t minor; //< The minor version of the number
-        std::uint32_t patch; //< The patch version of the number
+        /**
+         * @brief The major number of the version.
+         */
+        std::uint32_t major;
+        /**
+         * @brief The minor number of the version.
+         */
+        std::uint32_t minor;
+        /**
+         * @brief The patch number of the version.
+         */
+        std::uint32_t patch;
 
         constexpr auto operator==(semantic_version const& rhs) const -> bool = default;
         constexpr auto operator<=>(semantic_version const& rhs) const = default;

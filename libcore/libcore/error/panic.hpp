@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include <fmt/format.h>
-#include <fmt/os.h>
+#include <fmt/core.h>
 
+#include <concepts>
+#include <utility>
 #include <source_location>
 #include <string_view>
 #include <type_traits>

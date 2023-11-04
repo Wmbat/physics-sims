@@ -18,7 +18,7 @@
 
 #include <magic_enum.hpp>
 
-namespace core::vk
+namespace
 {
     struct vulkan_error_category : public std::error_category
     {
@@ -29,7 +29,10 @@ namespace core::vk
             return std::string{enum_name};
         }
     };
+} // namespace
 
+namespace core::vk
+{
     auto make_error_code(::vk::Result error_code) -> std::error_code
     {
         static auto error_category = vulkan_error_category{};

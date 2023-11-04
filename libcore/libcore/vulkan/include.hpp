@@ -61,7 +61,7 @@ namespace core::vk
      * version numbers.
      * @since 0.1.0
      *
-     * @param[in] The version to pack for Vulkan
+     * @param[in] version The version to pack for Vulkan
      */
     constexpr auto to_vulkan_version(core::semantic_version const& version) -> std::uint32_t
     {
@@ -73,7 +73,7 @@ namespace core::vk
      * within.
      * @since 0.1.0
      *
-     * @param[in] The version to unpack for Vulkan
+     * @param[in] version The version to unpack for Vulkan
      */
     constexpr auto from_vulkan_version(std::uint32_t version) -> core::semantic_version
     {

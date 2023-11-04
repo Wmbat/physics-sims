@@ -18,12 +18,11 @@
 
 #include <libcore/vulkan/instance.hpp>
 #include <libcore/vulkan/loader.hpp>
-#include <libcore/vulkan/physical_device.hpp>
+#include <libcore/vulkan/physical_device_selector.hpp>
 
 #include <spdlog/logger.h>
 
 #include <chrono>
-#include <vulkan/vulkan.hpp>
 
 namespace render
 {
@@ -32,7 +31,13 @@ namespace render
     {
         return core::vk::instance::make(app_info, logger)
             .and_then([&](core::vk::instance&& instance) -> tl::expected<system, core::error> {
-                auto device = core::vk::select_physical_device(instance);
+                auto device = core::vk::physical_device_selector{instance}
+                                  .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
+                                  .allow_any_device_type(true)
+                                  .with_graphics_queues()
+                                  .with_transfer_queues()
+                                  .with_compute_queues()
+                                  .select();
                 if (not device.has_value())
                 {
                     return tl::unexpected{std::move(device).error()};

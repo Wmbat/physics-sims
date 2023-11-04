@@ -18,6 +18,7 @@
 
 #include <fmt/core.h>
 
+#include <cstdio>
 #include <exception>
 
 namespace core::detail

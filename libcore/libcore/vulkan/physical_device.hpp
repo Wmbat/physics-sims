@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include <libcore/semantic_version.hpp>
 #include <libcore/vulkan/include.hpp>
 #include <libcore/vulkan/instance.hpp>
 
@@ -36,43 +37,33 @@
 namespace core::vk
 {
     /**
-     * @brief Represents an error when selecting a render::vk::physical_device.
-     * @since 0.1.0
+     * @brief Represents a physical device with Vulkan support. 
      */
-    enum struct physical_device_selection_error
-    {
-        no_physical_devices_found,
-        no_suitable_physical_devices_found
-    };
-
-    /**
-     * @brief Wraps a render::vk::physical_device_selection_error in a std::error_code for portable error handling.
-     * @since 0.1.0
-     *
-     * @param[in] error_code The error code to wrap. 
-     */
-    auto make_error_code(physical_device_selection_error error_code) -> std::error_code;
-
     struct physical_device
     {
-        ::vk::PhysicalDevice handle;                            ///< The Vulkan handle to the physical device.
-        ::vk::PhysicalDeviceProperties2 properties;             ///< The general properties of the physical device.
-        ::vk::PhysicalDeviceMemoryProperties memory_properties; ///< The memory properties of the physical device.
+        /**
+         * @brief The Vulkan handle to the physical device
+         */
+        ::vk::PhysicalDevice handle;
+
+        /**
+         * @brief The general properties of the physical device
+         */
+        ::vk::PhysicalDeviceProperties2 properties;
+
+        /**
+         * @brief The memory properties of the physical device.
+         */
+        ::vk::PhysicalDeviceMemoryProperties memory_properties;
+
+        /**
+         * @brief The queue family properties of the physical device.
+         */
+        std::vector<::vk::QueueFamilyProperties> queue_family_properties;
 
         /**
          * @brief Get the name of the physical device.
-         * @since 0.1.0
          */
         [[nodiscard]] auto get_name() const noexcept -> std::string_view;
     };
-
-    /**
-     * @brief Select the best suited physical device found on the client system.
-     * @since 0.1.0
-     *
-     * @param[in] instance The instance that was used to initialize vulkan.
-     *
-     * @returns A valid handle to a physical device or an error detailing what went wrong.
-     */
-    auto select_physical_device(instance const& instance) -> tl::expected<physical_device, core::error>;
 } // namespace core::vk
