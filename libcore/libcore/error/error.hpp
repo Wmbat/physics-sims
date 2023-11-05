@@ -83,14 +83,18 @@ struct fmt::formatter<core::error>
     auto format(core::error const& error, FormatContext& ctx)
     {
         auto const& error_code = error.error_code;
-        if (error_code)
-        {
-            return fmt::format_to(ctx.out(), "{0} ({1}: {2}-{3})", error.context, error_code->category().name(),
-                                  error_code->value(), error_code->message());
-        }
-        else
+        if (!error_code)
         {
             return fmt::format_to(ctx.out(), "{0}", error.context);
         }
+
+        if (error.context.empty())
+        {
+            return fmt::format_to(ctx.out(), "{0}: {1} (with error value {2})", error_code->category().name(),
+                                  error_code->message(), error_code->value());
+        }
+
+        return fmt::format_to(ctx.out(), "{1}:\n\t- {2} (with error value {3})\n\t- {0}", error.context,
+                              error_code->category().name(), error_code->message(), error_code->value());
     };
 };

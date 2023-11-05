@@ -26,30 +26,11 @@
 
 namespace render
 {
-    auto system::make(core::application_info const& app_info, spdlog::logger& logger)
+    auto system::make(core::application_info const&, spdlog::logger&)
         -> tl::expected<system, core::error>
     {
-        return core::vk::instance::make(app_info, logger)
-            .and_then([&](core::vk::instance&& instance) -> tl::expected<system, core::error> {
-                auto device = core::vk::physical_device_selector{instance}
-                                  .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
-                                  .allow_any_device_type(true)
-                                  .with_graphics_queues()
-                                  .with_transfer_queues()
-                                  .with_compute_queues()
-                                  .select();
-                if (not device.has_value())
-                {
-                    return tl::unexpected{std::move(device).error()};
-                }
-
-                logger.info("Using gpu \"{}\"", device->get_name());
-
-                return system{std::move(instance)};
-            });
+        return system{};
     }
-
-    system::system(core::vk::instance&& instance) : m_instance{std::move(instance)} {}
 
     void system::update(std::chrono::milliseconds) {}
 } // namespace render

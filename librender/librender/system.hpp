@@ -36,13 +36,9 @@ namespace render
         static auto make(core::application_info const& app_info, spdlog::logger& logger)
             -> tl::expected<system, core::error>;
 
-    private:
-        system(core::vk::instance&& instance);
-
     public:
         void update(std::chrono::milliseconds dt);
 
     private:
-        core::vk::instance m_instance;
     };
 } // namespace render

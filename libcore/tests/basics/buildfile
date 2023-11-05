@@ -1,3 +1,4 @@
 import libs = libcore%lib{core}
+import libs += catch2%liba{catch2wmain}
 
-exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
+exe{driver}: {hxx ixx txx cxx}{**} $libs

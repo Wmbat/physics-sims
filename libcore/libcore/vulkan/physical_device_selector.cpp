@@ -144,7 +144,7 @@ namespace core::vk
         // clang-format on
 
         auto const it = std::ranges::max_element(device_ratings, {}, &device_rating::second);
-        if (it != std::ranges::end(device_ratings))
+        if (it == std::ranges::end(device_ratings))
         {
             return tl::unexpected{core::error{.error_code = make_error_code(no_suitable_physical_devices_found)}};
         }
@@ -231,7 +231,6 @@ namespace core::vk
         for (auto const& family : queue_families)
         {
             [[maybe_unused]] auto const available_count = static_cast<int>(family.queueCount);
-
         }
 
         return 0;

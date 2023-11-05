@@ -19,3 +19,4 @@ depends: tl-expected ^1.1.0
 depends: libvulkan-meta ^1.0.0
 depends: magic_enum ^0.9.1
 depends: spdlog ^1.10.0
+depends: catch2 ^3.3.2

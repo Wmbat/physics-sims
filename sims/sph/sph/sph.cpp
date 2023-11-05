@@ -18,12 +18,16 @@
 
 #include <libcore/application_info.hpp>
 #include <libcore/core.hpp>
-#include <libcore/error/panic.hpp>
 #include <libcore/error/error.hpp>
+#include <libcore/error/panic.hpp>
+#include <libcore/vulkan/instance.hpp>
+#include <libcore/vulkan/physical_device_selector.hpp>
 
 #include <librender/system.hpp>
 
 #include <fmt/core.h>
+
+// clang-format off
 
 #include <spdlog/logger.h>
 #include <spdlog/common.h>
@@ -37,17 +41,19 @@
 #include <spdlog/sinks/basic_file_sink-inl.h>
 #include <spdlog/sinks/sink-inl.h>
 
+// clang-format on
+
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/range/primitives.hpp>
 #include <range/v3/view/span.hpp>
 
 #include <tl/expected.hpp>
 
-#include <string>
 #include <algorithm>
 #include <cstdlib>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -83,19 +89,49 @@ auto main(int argc, char* argv[]) -> int
     }
 
     auto const app_info = core::application_info{.name = args[0], .version = get_version()};
-    auto app_logger = create_logger(app_info.name);
 
-    if (auto res = render::system::make(app_info, app_logger))
+    try
     {
-        auto& render_system = res.value();
-        render_system.update(16ms);
+        auto app_logger = create_logger(app_info.name);
+
+        auto instance = core::vk::instance::make(app_info, app_logger);
+        if (!instance)
+        {
+            app_logger.error("Failed to create vulkan instance because \"{}\"", instance.error());
+            return EXIT_FAILURE;
+        }
+
+        auto device = core::vk::physical_device_selector{*instance}
+                          .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
+                          .allow_any_device_type(true)
+                          .with_graphics_queues()
+                          .with_transfer_queues()
+                          .with_compute_queues()
+                          .select();
+        if (!device)
+        {
+            app_logger.error("Failed to select a GPU because \"{}\"", device.error());
+            return EXIT_FAILURE;
+        }
+
+        app_logger.info("Using \"{}\"", device->get_name());
+
+        if (auto res = render::system::make(app_info, app_logger))
+        {
+            auto& render_system = res.value();
+            render_system.update(16ms);
+        }
+        else
+        {
+            app_logger.error("Failed to create the rendering system.");
+            app_logger.error("Failure Cause: {}", res.error());
+
+            return EXIT_FAILURE;
+        }
     }
-    else
+    catch (...)
     {
-        app_logger.error("Failed to create the rendering system.");
-        app_logger.error("Failure Cause: {}", res.error());
-
-        return EXIT_FAILURE;
+        core::panic("Oh noo, Something has gone terribly wrong ;)");
     }
 
     return 0;
