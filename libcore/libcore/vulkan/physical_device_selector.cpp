@@ -26,6 +26,9 @@
 #include <unordered_map>
 #include <utility>
 
+namespace rv = ranges::views;
+namespace stdr = std::ranges;
+
 template<>
 struct std::hash<vk::QueueFlags>
 {
@@ -33,16 +36,21 @@ struct std::hash<vk::QueueFlags>
     {
         using mask_type = vk::QueueFlags::MaskType;
         return hash<mask_type>{}(static_cast<mask_type>(flags));
-    };
+    }
 };
 
 namespace
 {
     struct physical_device_selection_error_category : public std::error_category
     {
-        [[nodiscard]] auto name() const noexcept -> char const* override { return "physical device selection error"; }
+        [[nodiscard]]
+        auto name() const noexcept -> char const* override
+        {
+            return "physical device selection error";
+        }
 
-        [[nodiscard]] auto message(int error_code) const noexcept -> std::string override
+        [[nodiscard]]
+        auto message(int error_code) const noexcept -> std::string override
         {
             auto const enum_name =
                 magic_enum::enum_name(static_cast<core::vk::physical_device_selection_error>(error_code));
@@ -132,24 +140,22 @@ namespace core::vk
         // clang-format off
 
         auto const populated_devices = devices 
-            | ranges::views::transform(populate_physical_device) 
+            | rv::transform(populate_physical_device) 
             | ranges::to<std::vector>();
         auto const rated_devices = populated_devices 
-            | ranges::views::transform([&](physical_device const& device) {
-                return rate_device(device);
-              });
-        auto const device_ratings = ranges::views::zip(populated_devices, rated_devices)
+            | rv::transform([&](physical_device const& device) { return rate_device(device); });
+        auto const device_ratings = rv::zip(populated_devices, rated_devices)
             | ranges::to<std::vector>();
 
         // clang-format on
 
-        auto const it = std::ranges::max_element(device_ratings, {}, &device_rating::second);
-        if (it == std::ranges::end(device_ratings))
+        if (auto const it = stdr::max_element(device_ratings, {}, &device_rating::second);
+            it != stdr::end(device_ratings))
         {
-            return tl::unexpected{core::error{.error_code = make_error_code(no_suitable_physical_devices_found)}};
+            return it->first;
         }
 
-        return it->first;
+        return tl::unexpected{core::error{.error_code = make_error_code(no_suitable_physical_devices_found)}};
     }
 
     auto physical_device_selector::rate_device(physical_device const& device) -> int
@@ -203,27 +209,41 @@ namespace core::vk
     auto physical_device_selector::rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families)
         -> int
     {
-        auto map = std::unordered_map<::vk::QueueFlags, int>();
+        struct data
+        {
+            int index;
+            int count;
+            ::vk::QueueFlags purpose;
+        };
+
+        auto test = std::vector<data>();
 
         // Pass for dedicated queues
-        for (auto const& family : queue_families)
+        for (auto const& [index, family] : queue_families | rv::enumerate)
         {
             auto const available_count = static_cast<int>(family.queueCount);
 
             if (family.queueFlags == ::vk::QueueFlagBits::eGraphics && m_graphics_queue_count.has_value())
             {
-                map[family.queueFlags] = std::max(m_graphics_queue_count.value(), available_count);
+                test.push_back({.index = static_cast<int>(index),
+                                .count = std::max(m_graphics_queue_count.value(), available_count),
+                                .purpose = ::vk::QueueFlagBits::eGraphics});
                 continue;
             }
 
             if (family.queueFlags == ::vk::QueueFlagBits::eCompute && m_compute_queue_count.has_value())
             {
-                map[family.queueFlags] = std::max(m_compute_queue_count.value(), available_count);
+                test.push_back({.index = static_cast<int>(index),
+                                .count = std::max(m_compute_queue_count.value(), available_count),
+                                .purpose = ::vk::QueueFlagBits::eCompute});
                 continue;
             }
 
             if (family.queueFlags == ::vk::QueueFlagBits::eTransfer && m_transfer_queue_count.has_value())
             {
+                test.push_back({.index = static_cast<int>(index),
+                                .count = std::max(m_transfer_queue_count.value(), available_count),
+                                .purpose = ::vk::QueueFlagBits::eTransfer});
                 continue;
             }
         }

@@ -96,5 +96,5 @@ struct fmt::formatter<core::error>
 
         return fmt::format_to(ctx.out(), "{1}:\n\t- {2} (with error value {3})\n\t- {0}", error.context,
                               error_code->category().name(), error_code->message(), error_code->value());
-    };
+    }
 };

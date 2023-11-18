@@ -6,7 +6,9 @@ AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: false
 AlignEscapedNewlines: Right
 AlignOperands: AlignAfterOperator
-AlignTrailingComments: true
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
@@ -21,6 +23,8 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: true
 BinPackParameters: true
+BreakAfterAttributes: Always
+BreakArrays: false
 BreakBeforeBraces: Custom
 BraceWrapping:
    AfterCaseLabel: true
@@ -60,14 +64,15 @@ IndentRequiresClause: true
 IndentWidth: 4
 IndentWrappedFunctionNames: false
 InsertBraces: true
-IndentRequires: true
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
 PointerAlignment: Left
 QualifierAlignment: Right
 ReflowComments: true
 ReferenceAlignment: Pointer
+RemoveSemicolon: true
 RequiresClausePosition: OwnLine
+RequiresExpressionIndentation: OuterScope
 SortIncludes: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false

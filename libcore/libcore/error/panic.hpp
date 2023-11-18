@@ -23,24 +23,25 @@
 #include <fmt/core.h>
 
 #include <concepts>
-#include <utility>
 #include <source_location>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 
 namespace core
 {
     namespace detail
     {
-        [[noreturn]] void panic_impl(std::string_view message) noexcept;
+        [[noreturn]]
+        void panic_impl(std::string_view message) noexcept;
     }
 
     struct panic_dynamic_string_view
     {
         template<class Type>
             requires std::constructible_from<std::string_view, Type>
-        panic_dynamic_string_view(
-            Type const& str, std::source_location loc = std::source_location::current()) noexcept :
+        panic_dynamic_string_view(Type const& str, std::source_location loc = std::source_location::current()) noexcept
+            :
             str{str},
             loc{loc}
         {}
@@ -53,10 +54,8 @@ namespace core
     struct panic_format
     {
         template<class Type>
-        consteval panic_format(Type const& fmt,
-                               std::source_location loc = std::source_location::current()) :
-            format{fmt},
-            loc{loc}
+        consteval panic_format(Type const& fmt, std::source_location loc = std::source_location::current()) :
+            format{fmt}, loc{loc}
         {}
 
         fmt::format_string<Args...> format;
@@ -68,15 +67,15 @@ namespace core
      *
      * Example usage:
      * @code{.cpp}
-     * 
+     *
      * @endcode
      *
      * @param[in] str
      */
-    [[noreturn]] inline void panic(panic_dynamic_string_view str) noexcept
+    [[noreturn]]
+    inline void panic(panic_dynamic_string_view str) noexcept
     {
-        auto const message =
-            fmt::format("{}:{} panic: {}\n", str.loc.file_name(), str.loc.line(), str.str);
+        auto const message = fmt::format("{}:{} panic: {}\n", str.loc.file_name(), str.loc.line(), str.str);
         detail::panic_impl(message);
     }
 
@@ -94,8 +93,8 @@ namespace core
      * @tparam Args The different argument types to format.
      */
     template<class... Args>
-    [[noreturn]] void panic(panic_format<std::type_identity_t<Args>...> fmt,
-                            Args&&... args) noexcept
+    [[noreturn]]
+    void panic(panic_format<std::type_identity_t<Args>...> fmt, Args&&... args) noexcept
         requires(sizeof...(Args) > 0)
     {
         auto const& loc = fmt.loc;
