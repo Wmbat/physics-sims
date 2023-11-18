@@ -26,8 +26,7 @@
 
 namespace render
 {
-    auto system::make(core::application_info const&, spdlog::logger&)
-        -> tl::expected<system, core::error>
+    auto system::make(core::application_info const&, spdlog::logger&) -> tl::expected<system, core::error>
     {
         return system{};
     }

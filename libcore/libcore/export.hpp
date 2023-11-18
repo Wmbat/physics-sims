@@ -8,11 +8,11 @@
 // used before their inline definition. The workaround is to reorder code. In
 // the end it's all trial and error.
 
-#if defined(LIBCORE_STATIC) // Using static.
+#if defined(LIBCORE_STATIC)         // Using static.
 #    define LIBCORE_SYMEXPORT
 #elif defined(LIBCORE_STATIC_BUILD) // Building static.
 #    define LIBCORE_SYMEXPORT
-#elif defined(LIBCORE_SHARED) // Using shared.
+#elif defined(LIBCORE_SHARED)       // Using shared.
 #    ifdef _WIN32
 #        define LIBCORE_SYMEXPORT __declspec(dllimport)
 #    else

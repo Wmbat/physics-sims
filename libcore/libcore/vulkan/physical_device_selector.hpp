@@ -135,8 +135,8 @@ namespace core::vk
          */
         auto with_graphics_queues(int desired_queue_count = 1) -> physical_device_selector&;
         /**
-         * @brief Specity whether the selection should try to create transfer queues, and set the amount of compute queues
-         * to create.
+         * @brief Specity whether the selection should try to create transfer queues, and set the amount of compute
+         * queues to create.
          * @warning There may not be the correct amount of queue if no device supports the amount requested.
          * @todo Implement precondition checking with jeremy-rifkin's libassert
          * @since 0.1.0

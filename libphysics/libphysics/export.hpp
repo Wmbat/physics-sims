@@ -9,21 +9,21 @@
 // the end it's all trial and error.
 
 #if defined(LIBPHYSICS_STATIC)         // Using static.
-#  define LIBPHYSICS_SYMEXPORT
+#    define LIBPHYSICS_SYMEXPORT
 #elif defined(LIBPHYSICS_STATIC_BUILD) // Building static.
-#  define LIBPHYSICS_SYMEXPORT
+#    define LIBPHYSICS_SYMEXPORT
 #elif defined(LIBPHYSICS_SHARED)       // Using shared.
-#  ifdef _WIN32
-#    define LIBPHYSICS_SYMEXPORT __declspec(dllimport)
-#  else
-#    define LIBPHYSICS_SYMEXPORT
-#  endif
+#    ifdef _WIN32
+#        define LIBPHYSICS_SYMEXPORT __declspec(dllimport)
+#    else
+#        define LIBPHYSICS_SYMEXPORT
+#    endif
 #elif defined(LIBPHYSICS_SHARED_BUILD) // Building shared.
-#  ifdef _WIN32
-#    define LIBPHYSICS_SYMEXPORT __declspec(dllexport)
-#  else
-#    define LIBPHYSICS_SYMEXPORT
-#  endif
+#    ifdef _WIN32
+#        define LIBPHYSICS_SYMEXPORT __declspec(dllexport)
+#    else
+#        define LIBPHYSICS_SYMEXPORT
+#    endif
 #else
 // If none of the above macros are defined, then we assume we are being used
 // by some third-party build system that cannot/doesn't signal the library
@@ -34,6 +34,7 @@
 // then you will probably want to replace the fallback with the (commented
 // out) error since it won't work for the shared case.
 //
-#  define LIBPHYSICS_SYMEXPORT         // Using static or shared.
-//#  error define LIBPHYSICS_STATIC or LIBPHYSICS_SHARED preprocessor macro to signal libphysics library type being linked
+#    define LIBPHYSICS_SYMEXPORT // Using static or shared.
+// #  error define LIBPHYSICS_STATIC or LIBPHYSICS_SHARED preprocessor macro to signal libphysics library type being
+// linked
 #endif

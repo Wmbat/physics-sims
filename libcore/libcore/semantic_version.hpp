@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include <fmt/format.h>

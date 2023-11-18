@@ -37,7 +37,7 @@
 namespace core::vk
 {
     /**
-     * @brief Represents a physical device with Vulkan support. 
+     * @brief Represents a physical device with Vulkan support.
      */
     struct physical_device
     {
@@ -64,6 +64,7 @@ namespace core::vk
         /**
          * @brief Get the name of the physical device.
          */
-        [[nodiscard]] auto get_name() const noexcept -> std::string_view;
+        [[nodiscard]]
+        auto get_name() const noexcept -> std::string_view;
     };
 } // namespace core::vk

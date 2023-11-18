@@ -103,7 +103,8 @@ namespace core::vk::detail
     /**
      * @brief Get the list of validation layers to enable for the vulkan instance.
      */
-    [[nodiscard]] auto get_desired_validation_layers() -> std::vector<char const*>
+    [[nodiscard]]
+    auto get_desired_validation_layers() -> std::vector<char const*>
     {
         auto enabled_layers = std::vector<char const*>{};
         if constexpr (should_enable_validation_layers)
@@ -124,7 +125,8 @@ namespace core::vk::detail
     /**
      * @brief Get the list of extension to enable for the vulkan instance.
      */
-    [[nodiscard]] auto get_desired_extensions() -> std::vector<char const*>
+    [[nodiscard]]
+    auto get_desired_extensions() -> std::vector<char const*>
     {
         auto enabled_exts = std::vector<char const*>{};
 
@@ -243,9 +245,14 @@ namespace core::vk
 {
     struct instance_error_category : public std::error_category
     {
-        [[nodiscard]] auto name() const noexcept -> char const* override { return "instance error"; }
+        [[nodiscard]]
+        auto name() const noexcept -> char const* override
+        {
+            return "instance error";
+        }
 
-        [[nodiscard]] auto message(int error_code) const noexcept -> std::string override
+        [[nodiscard]]
+        auto message(int error_code) const noexcept -> std::string override
         {
             auto const enum_name = magic_enum::enum_name(static_cast<instance_error>(error_code));
             return std::string{enum_name};

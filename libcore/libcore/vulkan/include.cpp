@@ -22,8 +22,13 @@ namespace
 {
     struct vulkan_error_category : public std::error_category
     {
-        [[nodiscard]] auto name() const noexcept -> char const* override { return "vulkan error"; }
-        [[nodiscard]] auto message(int error_code) const noexcept -> std::string override
+        [[nodiscard]]
+        auto name() const noexcept -> char const* override
+        {
+            return "vulkan error";
+        }
+        [[nodiscard]]
+        auto message(int error_code) const noexcept -> std::string override
         {
             auto const enum_name = magic_enum::enum_name(static_cast<::vk::Result>(error_code));
             return std::string{enum_name};

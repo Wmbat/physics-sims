@@ -8,11 +8,11 @@
 // used before their inline definition. The workaround is to reorder code. In
 // the end it's all trial and error.
 
-#if defined(LIBRENDER_STATIC) // Using static.
+#if defined(LIBRENDER_STATIC)         // Using static.
 #    define LIBRENDER_SYMEXPORT
 #elif defined(LIBRENDER_STATIC_BUILD) // Building static.
 #    define LIBRENDER_SYMEXPORT
-#elif defined(LIBRENDER_SHARED) // Using shared.
+#elif defined(LIBRENDER_SHARED)       // Using shared.
 #    ifdef _WIN32
 #        define LIBRENDER_SYMEXPORT __declspec(dllimport)
 #    else
