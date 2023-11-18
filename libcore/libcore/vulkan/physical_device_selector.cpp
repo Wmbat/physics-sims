@@ -14,20 +14,47 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/physical_device_selector.hpp>
+#include "libcore/vulkan/physical_device_selector.hpp"
 
-#include <range/v3/view/enumerate.hpp>
-#include <range/v3/view/transform.hpp>
+#include "libcore/error/error.hpp"
+#include "libcore/semantic_version.hpp"
+#include "libcore/vulkan/include.hpp"
+#include "libcore/vulkan/instance.hpp"
+#include "libcore/vulkan/physical_device.hpp"
 
-#include <magic_enum.hpp>
+#include "range/v3/algorithm/max_element.hpp"
+#include "range/v3/functional/bind_back.hpp"
+#include "range/v3/functional/comparisons.hpp"
+#include "range/v3/functional/invoke.hpp"
+#include "range/v3/iterator/basic_iterator.hpp"
+#include "range/v3/iterator/unreachable_sentinel.hpp"
+#include "range/v3/range/access.hpp"
+#include "range/v3/range/conversion.hpp"
+#include "range/v3/range/dangling.hpp"
+#include "range/v3/range_fwd.hpp"
+#include "range/v3/utility/common_type.hpp"
+#include "range/v3/view/all.hpp"
+#include "range/v3/view/enumerate.hpp"
+#include "range/v3/view/facade.hpp"
+#include "range/v3/view/transform.hpp"
+#include "range/v3/view/view.hpp"
+#include "range/v3/view/zip.hpp"
+
+#include "magic_enum.hpp"
+
+#include <vulkan/vulkan_funcs.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 #include <algorithm>
-#include <type_traits>
-#include <unordered_map>
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <string_view>
 #include <utility>
+#include <variant>
+#include <vector>
 
 namespace rv = ranges::views;
-namespace stdr = std::ranges;
 
 template<>
 struct std::hash<vk::QueueFlags>
@@ -149,8 +176,8 @@ namespace core::vk
 
         // clang-format on
 
-        if (auto const it = stdr::max_element(device_ratings, {}, &device_rating::second);
-            it != stdr::end(device_ratings))
+        if (auto const it = ranges::max_element(device_ratings, {}, &device_rating::second);
+            it != ranges::end(device_ratings))
         {
             return it->first;
         }

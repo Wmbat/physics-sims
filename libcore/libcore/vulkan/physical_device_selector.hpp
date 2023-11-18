@@ -16,14 +16,39 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/include.hpp>
-#include <libcore/vulkan/instance.hpp>
-#include <libcore/vulkan/physical_device.hpp>
+#pragma once
 
-#include <libcore/semantic_version.hpp>
+#include "libcore/vulkan/include.hpp"
 
-#include <functional>
+#include "libcore/semantic_version.hpp"
+
+#include "tl/expected.hpp"
+
+#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+
 #include <optional>
+#include <span>
+#include <system_error>
+
+// Forward Declarations
+
+namespace core
+{
+    struct error;
+
+    namespace vk
+    {
+        struct instance;
+        struct physical_device;
+    } // namespace vk
+} // namespace core
+
+namespace vk
+{
+    struct QueueFamilyProperties;
+}
 
 namespace core::vk
 {

@@ -21,6 +21,7 @@
 #include <libcore/error/error.hpp>
 #include <libcore/error/panic.hpp>
 #include <libcore/vulkan/instance.hpp>
+#include <libcore/vulkan/physical_device.hpp>
 #include <libcore/vulkan/physical_device_selector.hpp>
 
 #include <librender/system.hpp>

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/physical_device.hpp>
-
-#include <magic_enum.hpp>
-
-#include <system_error>
+#include "libcore/vulkan/physical_device.hpp"
+#include "libcore/vulkan/include.hpp"
 
 namespace core::vk
 {

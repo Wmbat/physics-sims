@@ -16,23 +16,15 @@
  * limitations under the License.
  */
 
-#include <libcore/semantic_version.hpp>
-#include <libcore/vulkan/include.hpp>
-#include <libcore/vulkan/instance.hpp>
+#pragma once
 
-#include <libcore/error/error.hpp>
+#include "libcore/vulkan/include.hpp"
 
-#include <tl/expected.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
-#include <range/v3/action/sort.hpp>
-#include <range/v3/range/conversion.hpp>
-#include <range/v3/range/operations.hpp>
-#include <range/v3/view/filter.hpp>
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-
-#include <concepts>
-#include <ranges>
+#include <string_view>
+#include <vector>
 
 namespace core::vk
 {

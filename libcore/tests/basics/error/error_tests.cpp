@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-#include <libcore/error/error.hpp>
+#include "libcore/error/error.hpp"
 
-#include <catch2/catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
-#include <fmt/core.h>
+#include "fmt/core.h"
+
+#include <format>
+#include <optional>
+#include <string>
+#include <system_error>
 
 SCENARIO("converting an core::error to string", "[libcore]") // NOLINT
 {
