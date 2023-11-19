@@ -102,12 +102,12 @@ auto main(int argc, char* argv[]) -> int
             return EXIT_FAILURE;
         }
 
-        auto device = core::vk::physical_device_selector{*instance}
+        auto device = core::vk::physical_device_selector{*instance, &app_logger}
                           .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
                           .allow_any_device_type(true)
-                          .with_graphics_queues()
-                          .with_transfer_queues()
-                          .with_compute_queues()
+                          .with_graphics_queues(3)
+                          .with_transfer_queues(1)
+                          .with_compute_queues(3)
                           .select();
         if (!device)
         {

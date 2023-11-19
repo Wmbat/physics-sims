@@ -22,6 +22,7 @@
 
 #include "libcore/semantic_version.hpp"
 
+#include "spdlog/logger.h"
 #include "tl/expected.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -101,7 +102,7 @@ namespace core::vk
     struct physical_device_selector
     {
     public:
-        physical_device_selector(instance const& instance);
+        physical_device_selector(instance const& instance, spdlog::logger* logger);
 
         /**
          * @brief Set the minimum vulkan version that the physical device should support.
@@ -190,6 +191,7 @@ namespace core::vk
 
     private:
         ::vk::Instance m_instance;
+        spdlog::logger* m_logger;
 
         semantic_version m_minimum_vulkan_version = from_vulkan_version(VK_API_VERSION_1_3);
         semantic_version m_desired_vulkan_version = from_vulkan_version(VK_API_VERSION_1_3);
@@ -197,8 +199,8 @@ namespace core::vk
         ::vk::PhysicalDeviceType m_prefered_device_type = ::vk::PhysicalDeviceType::eDiscreteGpu;
         bool m_should_allow_any_device_type = false;
 
-        std::optional<int> m_compute_queue_count = std::nullopt;
-        std::optional<int> m_graphics_queue_count = 1;
-        std::optional<int> m_transfer_queue_count = 1;
+        int m_compute_queue_count = 0;
+        int m_graphics_queue_count = 1;
+        int m_transfer_queue_count = 1;
     };
 } // namespace core::vk

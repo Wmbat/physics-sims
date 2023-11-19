@@ -22,6 +22,8 @@
 #include "libcore/vulkan/instance.hpp"
 #include "libcore/vulkan/physical_device.hpp"
 
+#include "range/v3/algorithm/fold.hpp"
+#include "range/v3/algorithm/fold_left.hpp"
 #include "range/v3/algorithm/max_element.hpp"
 #include "range/v3/functional/bind_back.hpp"
 #include "range/v3/functional/comparisons.hpp"
@@ -36,12 +38,14 @@
 #include "range/v3/view/all.hpp"
 #include "range/v3/view/enumerate.hpp"
 #include "range/v3/view/facade.hpp"
+#include "range/v3/view/filter.hpp"
 #include "range/v3/view/transform.hpp"
 #include "range/v3/view/view.hpp"
 #include "range/v3/view/zip.hpp"
 
 #include "magic_enum.hpp"
 
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_funcs.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -102,7 +106,9 @@ namespace core::vk
         return {static_cast<int>(error_code), error_category};
     }
 
-    physical_device_selector::physical_device_selector(instance const& instance) : m_instance(*instance) {}
+    physical_device_selector::physical_device_selector(instance const& instance, spdlog::logger* logger) :
+        m_instance{*instance}, m_logger{logger}
+    {}
 
     auto physical_device_selector::with_minimum_vulkan_version(semantic_version const& version)
         -> physical_device_selector&
@@ -176,6 +182,14 @@ namespace core::vk
 
         // clang-format on
 
+        if (m_logger)
+        {
+            for (auto const& [device, rating] : device_ratings)
+            {
+                m_logger->debug("The physical device \"{}\" was given a rating of {}", device.get_name(), rating);
+            }
+        }
+
         if (auto const it = ranges::max_element(device_ratings, {}, &device_rating::second);
             it != ranges::end(device_ratings))
         {
@@ -233,53 +247,114 @@ namespace core::vk
         }
     }
 
+    struct queue_allocation
+    {
+        int index;
+        int count;
+        ::vk::QueueFlags purpose;
+    };
+
+    auto get_used_queue_count(std::span<queue_allocation const> queue_allocations, std::size_t index) -> int
+    {
+        // clang-format off
+
+        auto const allocations_at_index = queue_allocations 
+            | rv::filter([index](queue_allocation const& data) { return std::cmp_equal(data.index, index); })
+            | rv::transform([](queue_allocation const& data) { return data.count; })
+            | ranges::to<std::vector>();
+
+        return ranges::fold_left(allocations_at_index, 0, std::plus());
+
+        // clang-format on
+    }
+
     auto physical_device_selector::rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families)
         -> int
     {
-        struct data
-        {
-            int index;
-            int count;
-            ::vk::QueueFlags purpose;
-        };
+        auto queue_allocations = std::vector<queue_allocation>();
 
-        auto test = std::vector<data>();
+        int graphics_queue_counter = m_graphics_queue_count;
+        int compute_queue_counter = m_compute_queue_count;
+        int transfer_queue_counter = m_transfer_queue_count;
 
         // Pass for dedicated queues
         for (auto const& [index, family] : queue_families | rv::enumerate)
         {
             auto const available_count = static_cast<int>(family.queueCount);
 
-            if (family.queueFlags == ::vk::QueueFlagBits::eGraphics && m_graphics_queue_count.has_value())
+            if (family.queueFlags == ::vk::QueueFlagBits::eGraphics)
             {
-                test.push_back({.index = static_cast<int>(index),
-                                .count = std::max(m_graphics_queue_count.value(), available_count),
-                                .purpose = ::vk::QueueFlagBits::eGraphics});
+                auto const queue_count = std::min(graphics_queue_counter, available_count);
+                graphics_queue_counter -= queue_count;
+
+                queue_allocations.push_back({.index = static_cast<int>(index),
+                                             .count = queue_count,
+                                             .purpose = ::vk::QueueFlagBits::eGraphics});
                 continue;
             }
 
-            if (family.queueFlags == ::vk::QueueFlagBits::eCompute && m_compute_queue_count.has_value())
+            if (family.queueFlags == ::vk::QueueFlagBits::eCompute)
             {
-                test.push_back({.index = static_cast<int>(index),
-                                .count = std::max(m_compute_queue_count.value(), available_count),
-                                .purpose = ::vk::QueueFlagBits::eCompute});
+                auto const queue_count = std::min(compute_queue_counter, available_count);
+                compute_queue_counter -= queue_count;
+
+                queue_allocations.push_back(
+                    {.index = static_cast<int>(index), .count = queue_count, .purpose = ::vk::QueueFlagBits::eCompute});
+
                 continue;
             }
 
-            if (family.queueFlags == ::vk::QueueFlagBits::eTransfer && m_transfer_queue_count.has_value())
+            if (family.queueFlags == ::vk::QueueFlagBits::eTransfer)
             {
-                test.push_back({.index = static_cast<int>(index),
-                                .count = std::max(m_transfer_queue_count.value(), available_count),
-                                .purpose = ::vk::QueueFlagBits::eTransfer});
+                auto const queue_count = std::min(transfer_queue_counter, available_count);
+                transfer_queue_counter -= queue_count;
+
+                queue_allocations.push_back({.index = static_cast<int>(index),
+                                             .count = transfer_queue_counter,
+                                             .purpose = ::vk::QueueFlagBits::eTransfer});
                 continue;
             }
         }
 
-        for (auto const& family : queue_families)
+        for (auto const& [index, family] : queue_families | rv::enumerate)
         {
-            [[maybe_unused]] auto const available_count = static_cast<int>(family.queueCount);
+            auto const used_count = get_used_queue_count(queue_allocations, index);
+            auto const available_queue_count = std::max(0, static_cast<int>(family.queueCount) - used_count);
+
+            if ((family.queueFlags & ::vk::QueueFlagBits::eGraphics) && graphics_queue_counter > 0)
+            {
+                auto const queue_count = std::min(graphics_queue_counter, available_queue_count);
+                graphics_queue_counter -= queue_count;
+
+                queue_allocations.push_back({.index = static_cast<int>(index),
+                                             .count = queue_count,
+                                             .purpose = ::vk::QueueFlagBits::eGraphics});
+            }
+
+            if ((family.queueFlags & ::vk::QueueFlagBits::eCompute) && compute_queue_counter > 0)
+            {
+                auto const queue_count = std::min(compute_queue_counter, available_queue_count);
+                compute_queue_counter -= queue_count;
+
+                queue_allocations.push_back(
+                    {.index = static_cast<int>(index), .count = queue_count, .purpose = ::vk::QueueFlagBits::eCompute});
+            }
+
+            if ((family.queueFlags & ::vk::QueueFlagBits::eTransfer) && transfer_queue_counter > 0)
+            {
+                auto const queue_count = std::min(transfer_queue_counter, available_queue_count);
+                transfer_queue_counter -= queue_count;
+
+                queue_allocations.push_back({.index = static_cast<int>(index),
+                                             .count = queue_count,
+                                             .purpose = ::vk::QueueFlagBits::eTransfer});
+            }
         }
 
-        return 0;
+        auto const rating = queue_allocations | rv::transform([](queue_allocation const& data) {
+                                return data.count;
+                            });
+
+        return ranges::fold_left(rating, 0, std::plus());
     }
 } // namespace core::vk
