@@ -177,8 +177,6 @@ namespace core::vk
          * @brief Selects the physical device that best suits the settings.
          * @since 0.1.0
          *
-         * @param[in] instance
-         *
          * @returns A valid physical device that can be used for various render or compute operations or an error code
          * detailing what could have gone wrong during the selection.
          */

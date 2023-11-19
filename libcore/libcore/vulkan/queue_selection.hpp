@@ -16,14 +16,16 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/include.hpp>
+#pragma once
+
+#include "libcore/vulkan/include.hpp"
 
 namespace core::vk
 {
     /**
      * @brief Properties of a physical device queue.
      */
-    struct queue_family_properties
+    struct queue_properties
     {
         /**
          * @brief The operations that are supported by the queue.
@@ -33,13 +35,13 @@ namespace core::vk
         /**
          * @brief The index of the queue family.
          */
-        std::uint32_t family_index;
+        std::size_t family_index;
 
         /**
          * @brief The index of the queue within the family.
          */
-        std::uint32_t queue_index;
+        std::size_t queue_index;
     };
 
-    auto get_queue_family_properties() -> std::vector<queue_family_properties>;
+    auto get_queue_properties() -> std::vector<queue_properties>;
 } // namespace core::vk

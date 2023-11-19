@@ -22,7 +22,7 @@
 #include "libcore/vulkan/instance.hpp"
 #include "libcore/vulkan/physical_device.hpp"
 
-#include "range/v3/algorithm/fold.hpp"
+#include "libcore/vulkan/queue_selector.hpp"
 #include "range/v3/algorithm/fold_left.hpp"
 #include "range/v3/algorithm/max_element.hpp"
 #include "range/v3/functional/bind_back.hpp"
@@ -247,114 +247,16 @@ namespace core::vk
         }
     }
 
-    struct queue_allocation
-    {
-        int index;
-        int count;
-        ::vk::QueueFlags purpose;
-    };
-
-    auto get_used_queue_count(std::span<queue_allocation const> queue_allocations, std::size_t index) -> int
-    {
-        // clang-format off
-
-        auto const allocations_at_index = queue_allocations 
-            | rv::filter([index](queue_allocation const& data) { return std::cmp_equal(data.index, index); })
-            | rv::transform([](queue_allocation const& data) { return data.count; })
-            | ranges::to<std::vector>();
-
-        return ranges::fold_left(allocations_at_index, 0, std::plus());
-
-        // clang-format on
-    }
 
     auto physical_device_selector::rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families)
         -> int
     {
-        auto queue_allocations = std::vector<queue_allocation>();
+        auto const queues = queue_selector{}
+            .with_graphics_queues(m_graphics_queue_count)
+            .with_compute_queues(m_compute_queue_count)
+            .with_transfer_queues(m_transfer_queue_count)
+            .select_from(queue_families);
 
-        int graphics_queue_counter = m_graphics_queue_count;
-        int compute_queue_counter = m_compute_queue_count;
-        int transfer_queue_counter = m_transfer_queue_count;
-
-        // Pass for dedicated queues
-        for (auto const& [index, family] : queue_families | rv::enumerate)
-        {
-            auto const available_count = static_cast<int>(family.queueCount);
-
-            if (family.queueFlags == ::vk::QueueFlagBits::eGraphics)
-            {
-                auto const queue_count = std::min(graphics_queue_counter, available_count);
-                graphics_queue_counter -= queue_count;
-
-                queue_allocations.push_back({.index = static_cast<int>(index),
-                                             .count = queue_count,
-                                             .purpose = ::vk::QueueFlagBits::eGraphics});
-                continue;
-            }
-
-            if (family.queueFlags == ::vk::QueueFlagBits::eCompute)
-            {
-                auto const queue_count = std::min(compute_queue_counter, available_count);
-                compute_queue_counter -= queue_count;
-
-                queue_allocations.push_back(
-                    {.index = static_cast<int>(index), .count = queue_count, .purpose = ::vk::QueueFlagBits::eCompute});
-
-                continue;
-            }
-
-            if (family.queueFlags == ::vk::QueueFlagBits::eTransfer)
-            {
-                auto const queue_count = std::min(transfer_queue_counter, available_count);
-                transfer_queue_counter -= queue_count;
-
-                queue_allocations.push_back({.index = static_cast<int>(index),
-                                             .count = transfer_queue_counter,
-                                             .purpose = ::vk::QueueFlagBits::eTransfer});
-                continue;
-            }
-        }
-
-        for (auto const& [index, family] : queue_families | rv::enumerate)
-        {
-            auto const used_count = get_used_queue_count(queue_allocations, index);
-            auto const available_queue_count = std::max(0, static_cast<int>(family.queueCount) - used_count);
-
-            if ((family.queueFlags & ::vk::QueueFlagBits::eGraphics) && graphics_queue_counter > 0)
-            {
-                auto const queue_count = std::min(graphics_queue_counter, available_queue_count);
-                graphics_queue_counter -= queue_count;
-
-                queue_allocations.push_back({.index = static_cast<int>(index),
-                                             .count = queue_count,
-                                             .purpose = ::vk::QueueFlagBits::eGraphics});
-            }
-
-            if ((family.queueFlags & ::vk::QueueFlagBits::eCompute) && compute_queue_counter > 0)
-            {
-                auto const queue_count = std::min(compute_queue_counter, available_queue_count);
-                compute_queue_counter -= queue_count;
-
-                queue_allocations.push_back(
-                    {.index = static_cast<int>(index), .count = queue_count, .purpose = ::vk::QueueFlagBits::eCompute});
-            }
-
-            if ((family.queueFlags & ::vk::QueueFlagBits::eTransfer) && transfer_queue_counter > 0)
-            {
-                auto const queue_count = std::min(transfer_queue_counter, available_queue_count);
-                transfer_queue_counter -= queue_count;
-
-                queue_allocations.push_back({.index = static_cast<int>(index),
-                                             .count = queue_count,
-                                             .purpose = ::vk::QueueFlagBits::eTransfer});
-            }
-        }
-
-        auto const rating = queue_allocations | rv::transform([](queue_allocation const& data) {
-                                return data.count;
-                            });
-
-        return ranges::fold_left(rating, 0, std::plus());
+        return static_cast<int>(ranges::size(queues));
     }
 } // namespace core::vk
