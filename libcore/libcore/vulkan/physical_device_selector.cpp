@@ -106,9 +106,15 @@ namespace core::vk
         return {static_cast<int>(error_code), error_category};
     }
 
-    physical_device_selector::physical_device_selector(instance const& instance, spdlog::logger* logger) :
-        m_instance{*instance}, m_logger{logger}
+    physical_device_selector::physical_device_selector(std::span<const ::vk::PhysicalDevice> physical_devices) :
+        m_physical_devices{physical_devices}
     {}
+
+    auto physical_device_selector::with_logger(spdlog::logger& logger) -> physical_device_selector&
+    {
+        m_logger = &logger;
+        return *this;
+    }
 
     auto physical_device_selector::with_minimum_vulkan_version(semantic_version const& version)
         -> physical_device_selector&
@@ -159,20 +165,14 @@ namespace core::vk
         using device_rating = std::pair<physical_device, int>;
         using enum physical_device_selection_error;
 
-        auto const [result, devices] = m_instance.enumeratePhysicalDevices();
-        if (result != ::vk::Result::eSuccess)
-        {
-            return tl::unexpected{core::error{.error_code = make_error_code(result)}};
-        }
-
-        if (devices.empty())
+        if (m_physical_devices.empty())
         {
             return tl::unexpected{core::error{.error_code = make_error_code(no_physical_devices_found)}};
         }
 
         // clang-format off
 
-        auto const populated_devices = devices 
+        auto const populated_devices = m_physical_devices 
             | rv::transform(populate_physical_device) 
             | ranges::to<std::vector>();
         auto const rated_devices = populated_devices 
@@ -247,15 +247,14 @@ namespace core::vk
         }
     }
 
-
     auto physical_device_selector::rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families)
         -> int
     {
         auto const queues = queue_selector{}
-            .with_graphics_queues(m_graphics_queue_count)
-            .with_compute_queues(m_compute_queue_count)
-            .with_transfer_queues(m_transfer_queue_count)
-            .select_from(queue_families);
+                                .with_graphics_queues(m_graphics_queue_count)
+                                .with_compute_queues(m_compute_queue_count)
+                                .with_transfer_queues(m_transfer_queue_count)
+                                .select_from(queue_families);
 
         return static_cast<int>(ranges::size(queues));
     }

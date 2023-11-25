@@ -1,6 +1,6 @@
 /**
- * @file libcore/libcore/vulkan/queue_selector.hpp
- * @brief Utilities to simplify and generalize the selection of vulkan queues.
+ * @file libcore/libcore/vulkan/device_builder.hpp
+ * @brief Utility to simplify the creation of a vulkan logical device.
  * @copyright Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,22 +18,25 @@
 
 #pragma once
 
-#include "libcore/vulkan/queue_properties.hpp"
+#include "libcore/error/error.hpp"
+#include "libcore/vulkan/device.hpp"
+#include "libcore/vulkan/include.hpp"
+#include "libcore/vulkan/instance.hpp"
+#include "libcore/vulkan/physical_device.hpp"
 
-#include <vulkan/vulkan_structs.hpp>
+#include "tl/expected.hpp"
 
-#include <span>
+#include <vulkan/vulkan_handles.hpp>
 
 namespace core::vk
 {
-    /**
-     * @brief 
-     */
-    struct queue_selector
+    struct device_builder
     {
     public:
+        device_builder(physical_device const& physical_device);
+
         /**
-         * @brief Specify the amount of compute queues to find.
+         * @brief Specify the amount of compute queues to create.
          * @warning There may not be the correct amount of queue if no device supports the amount requested.
          * @todo Implement precondition checking with jeremy-rifkin's libassert
          * @since 0.1.0
@@ -42,9 +45,9 @@ namespace core::vk
          *
          * @param[in] desired_queue_count The number of compute queues that should be created.
          */
-        auto with_compute_queues(int desired_queue_count = 1) -> queue_selector&;
+        auto with_compute_queues(int desired_queue_count = 1) -> device_builder&;
         /**
-         * @brief Specify the amount of compute queues to find.
+         * @brief Specify the amount of compute queues to create.
          * @warning There may not be the correct amount of queue if no device supports the amount requested.
          * @todo Implement precondition checking with jeremy-rifkin's libassert
          * @since 0.1.0
@@ -53,9 +56,9 @@ namespace core::vk
          *
          * @param[in] desired_queue_count The number of graphics queues that should be created.
          */
-        auto with_graphics_queues(int desired_queue_count = 1) -> queue_selector&;
+        auto with_graphics_queues(int desired_queue_count = 1) -> device_builder&;
         /**
-         * @brief Specity whether the selection should try to find transfer queues, and set the amount of compute
+         * @brief Specity whether the selection should try to create transfer queues, and set the amount of compute
          * queues to create.
          * @warning There may not be the correct amount of queue if no device supports the amount requested.
          * @todo Implement precondition checking with jeremy-rifkin's libassert
@@ -65,15 +68,13 @@ namespace core::vk
          *
          * @param[in] desired_queue_count The number of transfer queues that should be created.
          */
-        auto with_transfer_queues(int desired_queue_count = 1) -> queue_selector&;
+        auto with_transfer_queues(int desired_queue_count = 1) -> device_builder&;
 
-        /**
-         * @brief Selects the queues.
-         * @since 0.1.0
-         */
-        auto select_from(std::span<const ::vk::QueueFamilyProperties> queue_families) -> std::vector<queue_properties>;
+        auto build() -> tl::expected<device, core::error>;
 
     private:
+        physical_device const* m_physical_device;
+
         int m_compute_queue_count = 0;
         int m_graphics_queue_count = 1;
         int m_transfer_queue_count = 1;

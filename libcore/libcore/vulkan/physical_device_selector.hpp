@@ -41,7 +41,6 @@ namespace core
 
     namespace vk
     {
-        struct instance;
         struct physical_device;
     } // namespace vk
 } // namespace core
@@ -102,7 +101,9 @@ namespace core::vk
     struct physical_device_selector
     {
     public:
-        physical_device_selector(instance const& instance, spdlog::logger* logger);
+        physical_device_selector(std::span<const ::vk::PhysicalDevice> physical_devices);
+
+        auto with_logger(spdlog::logger& logger) -> physical_device_selector&;
 
         /**
          * @brief Set the minimum vulkan version that the physical device should support.
@@ -188,8 +189,9 @@ namespace core::vk
         auto rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families) -> int;
 
     private:
-        ::vk::Instance m_instance;
-        spdlog::logger* m_logger;
+        spdlog::logger* m_logger = nullptr;
+
+        std::span<const ::vk::PhysicalDevice> m_physical_devices;
 
         semantic_version m_minimum_vulkan_version = from_vulkan_version(VK_API_VERSION_1_3);
         semantic_version m_desired_vulkan_version = from_vulkan_version(VK_API_VERSION_1_3);

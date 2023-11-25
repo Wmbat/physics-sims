@@ -1,6 +1,6 @@
 /**
- * @file libcore/libcore/vulkan/queue_selection.hpp
- * @brief Contains code to select a physical device queue
+ * @file libcore/libcore/vulkan/device.hpp
+ * @brief Represents the logical interface of a physical device.
  * @copyright Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,30 +18,9 @@
 
 #pragma once
 
-#include "libcore/vulkan/include.hpp"
-
 namespace core::vk
 {
-    /**
-     * @brief Properties of a physical device queue.
-     */
-    struct queue_properties
+    struct device
     {
-        /**
-         * @brief The operations that are supported by the queue.
-         */
-        ::vk::QueueFlags flags;
-
-        /**
-         * @brief The index of the queue family.
-         */
-        std::size_t family_index;
-
-        /**
-         * @brief The index of the queue within the family.
-         */
-        std::size_t queue_index;
     };
-
-    auto get_queue_properties() -> std::vector<queue_properties>;
 } // namespace core::vk

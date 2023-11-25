@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#include <sph/core.hpp>
+#include "sph/core.hpp"
 
-#include <libcore/application_info.hpp>
-#include <libcore/core.hpp>
-#include <libcore/error/error.hpp>
-#include <libcore/error/panic.hpp>
-#include <libcore/vulkan/instance.hpp>
-#include <libcore/vulkan/physical_device.hpp>
-#include <libcore/vulkan/physical_device_selector.hpp>
+#include "libcore/application_info.hpp"
+#include "libcore/core.hpp"
+#include "libcore/error/error.hpp"
+#include "libcore/error/panic.hpp"
+#include "libcore/vulkan/device_builder.hpp"
+#include "libcore/vulkan/instance.hpp"
+#include "libcore/vulkan/physical_device.hpp"
+#include "libcore/vulkan/physical_device_selector.hpp"
 
 #include <librender/system.hpp>
 
@@ -102,20 +103,38 @@ auto main(int argc, char* argv[]) -> int
             return EXIT_FAILURE;
         }
 
-        auto device = core::vk::physical_device_selector{*instance, &app_logger}
-                          .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
-                          .allow_any_device_type(true)
-                          .with_graphics_queues(3)
-                          .with_transfer_queues(1)
-                          .with_compute_queues(3)
-                          .select();
-        if (!device)
+        auto const [result, devices] = (*instance)->enumeratePhysicalDevices();
+        if (result != vk::Result::eSuccess)
         {
-            app_logger.error("Failed to select a GPU because \"{}\"", device.error());
+            app_logger.error("Failed to query the physical devices available to the machine");
             return EXIT_FAILURE;
         }
 
-        app_logger.info("Using \"{}\"", device->get_name());
+        auto physical_device = core::vk::physical_device_selector{devices}
+                                   .with_logger(app_logger)
+                                   .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
+                                   .allow_any_device_type(true)
+                                   .with_graphics_queues(3)
+                                   .with_transfer_queues(1)
+                                   .with_compute_queues(3)
+                                   .select();
+        if (!physical_device)
+        {
+            app_logger.error("Failed to select a GPU because \"{}\"", physical_device.error());
+            return EXIT_FAILURE;
+        }
+
+        app_logger.info("Using \"{}\"", physical_device->get_name());
+
+        auto device = core::vk::device_builder{*physical_device}
+                          .with_graphics_queues(3)
+                          .with_transfer_queues(1)
+                          .with_compute_queues(3)
+                          .build();
+        if (!device)
+        {
+            return EXIT_FAILURE;
+        }
 
         if (auto res = render::system::make(app_info, app_logger))
         {
