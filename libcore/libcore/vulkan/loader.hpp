@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/include.hpp>
+#include "libcore/vulkan/include.hpp"
 
 #include <spdlog/logger.h>
 
@@ -28,7 +28,7 @@ namespace core::vk
      * @brief Loads the vulkan symbols using a \ref ::vk::DynamicLoader
      * since 0.1.0
      *
-     * @param[in] logger
+     * @param[in] logger The logger used for reporting.
      */
     auto load_vulkan_symbols(spdlog::logger& logger) -> ::vk::DynamicLoader;
 } // namespace core::vk

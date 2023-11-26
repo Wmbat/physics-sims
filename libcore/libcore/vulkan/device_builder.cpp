@@ -23,7 +23,6 @@
 
 #include "libcore/error/error.hpp"
 
-#include "range/v3/algorithm/fold_left.hpp"
 #include "tl/expected.hpp"
 
 #include "range/v3/range/conversion.hpp"
@@ -134,7 +133,7 @@ namespace core::vk
             | rv::transform([](auto subrange) { return make_queue_family_properties(subrange); })
             | ranges::to<std::vector>();
 
-        std::vector queue_family_properties = queues_by_family 
+        std::vector const queue_family_properties = queues_by_family 
             | rv::transform(to_device_queue_properties) 
             | ranges::to<std::vector>();
 

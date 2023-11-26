@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/instance.hpp>
+#include "libcore/vulkan/instance.hpp"
 
-#include <libcore/vulkan/include.hpp>
-#include <libcore/vulkan/loader.hpp>
+#include "libcore/vulkan/include.hpp"
+#include "libcore/vulkan/loader.hpp"
 
-#include <libcore/application_info.hpp>
-#include <libcore/semantic_version.hpp>
+#include "libcore/application_info.hpp"
+#include "libcore/semantic_version.hpp"
 
-#include <spdlog/logger.h>
+#include "spdlog/logger.h"
 
-#include <tl/expected.hpp>
+#include "tl/expected.hpp"
 
 #include <magic_enum.hpp>
 

@@ -85,7 +85,7 @@ namespace core::vk
      *     .with_graphics_queues(3)
      *     .with_transfer_queues(1)
      *     .with_compute_queues(3)
-     *     .select(instance);
+     *     .select();
      *
      * if (not device_result.has_value())
      * {

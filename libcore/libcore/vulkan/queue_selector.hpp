@@ -27,7 +27,7 @@
 namespace core::vk
 {
     /**
-     * @brief 
+     * @brief Tries to select the best queues based on their purpose from a list of available queues.
      */
     struct queue_selector
     {
