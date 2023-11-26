@@ -90,36 +90,9 @@ namespace core::vk::detail
 {
     using namespace std::literals;
 
-    auto is_khr_validation_layer(::vk::LayerProperties const& property) -> bool
-    {
-        return std::string_view{property.layerName} == "VK_LAYER_KHRONOS_validation"sv;
-    }
-
     auto is_debug_utils_ext(::vk::ExtensionProperties const& property) -> bool
     {
         return std::string_view{property.extensionName} == "VK_EXT_debug_utils"sv;
-    }
-
-    /**
-     * @brief Get the list of validation layers to enable for the vulkan instance.
-     */
-    [[nodiscard]]
-    auto get_desired_validation_layers() -> std::vector<char const*>
-    {
-        auto enabled_layers = std::vector<char const*>{};
-        if constexpr (should_enable_validation_layers)
-        {
-            auto const [result, properties] = ::vk::enumerateInstanceLayerProperties();
-            if (result == ::vk::Result::eSuccess)
-            {
-                if (ranges::find_if(properties, is_khr_validation_layer) != ranges::end(properties))
-                {
-                    enabled_layers.push_back("VK_LAYER_KHRONOS_validation");
-                }
-            }
-        }
-
-        return enabled_layers;
     }
 
     /**
@@ -187,7 +160,8 @@ namespace core::vk::detail
         auto [result, instance] = ::vk::createInstanceUnique(create_info);
         if (result != ::vk::Result::eSuccess)
         {
-            return tl::unexpected(core::error{.error_code = vk::make_error_code(result)});
+            return tl::unexpected(
+                core::error{.error_code = vk::make_error_code(result), .context = "Failed to create vulkan instance"});
         }
 
         VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
@@ -290,6 +264,18 @@ namespace core::vk
         m_loader(std::move(loader)),
         m_instance(std::move(instance)), m_debug_utils(std::move(debug_utils))
     {}
+
+    auto instance::enumerate_physical_devices() -> tl::expected<std::vector<::vk::PhysicalDevice>, core::error>
+    {
+        auto const [result, devices] = m_instance->enumeratePhysicalDevices();
+        if (result != ::vk::Result::eSuccess)
+        {
+            return tl::unexpected{
+                core::error{.context = "Failed to query the physical devices available to the machine"}};
+        }
+
+        return devices;
+    }
 
     auto instance::operator*() noexcept -> ::vk::Instance&
     {

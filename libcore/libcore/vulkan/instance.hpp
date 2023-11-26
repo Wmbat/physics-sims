@@ -77,6 +77,8 @@ namespace core::vk
                  ::vk::UniqueDebugUtilsMessengerEXT&& debug_utils);
 
     public:
+        auto enumerate_physical_devices() -> tl::expected<std::vector<::vk::PhysicalDevice>, core::error>;
+
         auto operator*() noexcept -> ::vk::Instance&;
         auto operator*() const noexcept -> ::vk::Instance const&;
         auto operator->() noexcept -> ::vk::Instance*;

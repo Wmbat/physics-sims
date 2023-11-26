@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include <libcore/vulkan/include.hpp>
+#include "libcore/vulkan/include.hpp"
 
-#include <magic_enum.hpp>
+#include "range/v3/algorithm/find_if.hpp"
+
+#include "magic_enum.hpp"
 
 namespace
 {
@@ -38,9 +40,42 @@ namespace
 
 namespace core::vk
 {
+    namespace details
+    {
+        using namespace std::literals;
+
+        auto is_khr_validation_layer(::vk::LayerProperties const& property) -> bool
+        {
+            return std::string_view{property.layerName} == "VK_LAYER_KHRONOS_validation"sv;
+        }
+    } // namespace details
+
     auto make_error_code(::vk::Result error_code) -> std::error_code
     {
         static auto error_category = vulkan_error_category{};
         return std::error_code{static_cast<int>(error_code), error_category};
+    }
+
+    [[nodiscard]]
+    auto get_desired_validation_layers() -> std::vector<char const*>
+    {
+        if constexpr (!should_enable_validation_layers)
+        {
+            return {};
+        }
+
+        auto const [result, properties] = ::vk::enumerateInstanceLayerProperties();
+        if (result != ::vk::Result::eSuccess)
+        {
+            return {};
+        }
+
+        auto enabled_layers = std::vector<char const*>{};
+        if (ranges::find_if(properties, details::is_khr_validation_layer) != ranges::end(properties))
+        {
+            enabled_layers.push_back("VK_LAYER_KHRONOS_validation");
+        }
+
+        return enabled_layers;
     }
 } // namespace core::vk

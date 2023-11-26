@@ -54,6 +54,11 @@ namespace core::vk
         std::vector<::vk::QueueFamilyProperties> queue_family_properties;
 
         /**
+         * @brief The features supported by the physical device
+         */
+        ::vk::PhysicalDeviceFeatures features;
+
+        /**
          * @brief Get the name of the physical device.
          */
         [[nodiscard]]

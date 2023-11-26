@@ -24,6 +24,8 @@
 #include "libcore/vulkan/instance.hpp"
 #include "libcore/vulkan/physical_device.hpp"
 
+#include "spdlog/logger.h"
+
 #include "tl/expected.hpp"
 
 #include <vulkan/vulkan_handles.hpp>
@@ -34,6 +36,14 @@ namespace core::vk
     {
     public:
         device_builder(physical_device const& physical_device);
+
+        /**
+         * @brief Enable logging for the selection process, this will give extra information about what is happening.
+         * @since 0.1.0
+         *
+         * @param[in] logger The logger to use.
+         */
+        auto with_logger(spdlog::logger& logger) -> device_builder&;
 
         /**
          * @brief Specify the amount of compute queues to create.
@@ -74,6 +84,7 @@ namespace core::vk
 
     private:
         physical_device const* m_physical_device;
+        spdlog::logger* m_logger = nullptr;
 
         int m_compute_queue_count = 0;
         int m_graphics_queue_count = 1;

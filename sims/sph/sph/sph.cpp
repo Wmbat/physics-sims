@@ -58,6 +58,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <vulkan/vulkan_handles.hpp>
 
 using namespace std::literals::chrono_literals;
 
@@ -99,25 +100,21 @@ auto main(int argc, char* argv[]) -> int
         auto instance = core::vk::instance::make(app_info, app_logger);
         if (!instance)
         {
-            app_logger.error("Failed to create vulkan instance because \"{}\"", instance.error());
+            app_logger.error("{}", instance.error());
             return EXIT_FAILURE;
         }
 
-        auto const [result, devices] = (*instance)->enumeratePhysicalDevices();
-        if (result != vk::Result::eSuccess)
-        {
-            app_logger.error("Failed to query the physical devices available to the machine");
-            return EXIT_FAILURE;
-        }
-
-        auto physical_device = core::vk::physical_device_selector{devices}
-                                   .with_logger(app_logger)
-                                   .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
-                                   .allow_any_device_type(true)
-                                   .with_graphics_queues(3)
-                                   .with_transfer_queues(1)
-                                   .with_compute_queues(3)
-                                   .select();
+        auto physical_device = instance->enumerate_physical_devices()
+            .and_then([&](std::vector<::vk::PhysicalDevice>&& devices) {
+                return core::vk::physical_device_selector{devices}
+                    .with_logger(app_logger)
+                    .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
+                    .allow_any_device_type(true)
+                    .with_graphics_queues(1)
+                    .with_compute_queues(1)
+                    .with_transfer_queues(1)
+                    .select();
+            });
         if (!physical_device)
         {
             app_logger.error("Failed to select a GPU because \"{}\"", physical_device.error());
@@ -127,12 +124,14 @@ auto main(int argc, char* argv[]) -> int
         app_logger.info("Using \"{}\"", physical_device->get_name());
 
         auto device = core::vk::device_builder{*physical_device}
-                          .with_graphics_queues(3)
+                          .with_logger(app_logger)
+                          .with_graphics_queues(1)
+                          .with_compute_queues(1)
                           .with_transfer_queues(1)
-                          .with_compute_queues(3)
                           .build();
         if (!device)
         {
+            app_logger.error("{}", device.error());
             return EXIT_FAILURE;
         }
 

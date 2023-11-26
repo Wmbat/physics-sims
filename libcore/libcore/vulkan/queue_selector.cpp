@@ -71,8 +71,8 @@ namespace core::vk
                 for (auto i : rv::iota(used_count) | rv::take(queue_count))
                 {
                     queues.push_back({.flags = ::vk::QueueFlagBits::eGraphics,
-                                      .family_index = family_index,
-                                      .queue_index = static_cast<size_t>(i)});
+                                      .family_index = static_cast<std::uint32_t>(family_index),
+                                      .queue_index = static_cast<std::uint32_t>(i)});
                 }
 
                 graphics_queue_counter -= queue_count;
@@ -89,8 +89,8 @@ namespace core::vk
                 for (auto i : rv::iota(used_count) | rv::take(queue_count))
                 {
                     queues.push_back({.flags = ::vk::QueueFlagBits::eCompute,
-                                      .family_index = family_index,
-                                      .queue_index = static_cast<size_t>(i)});
+                                      .family_index = static_cast<std::uint32_t>(family_index),
+                                      .queue_index = static_cast<std::uint32_t>(i)});
                 }
 
                 compute_queue_counter -= queue_count;
@@ -107,8 +107,8 @@ namespace core::vk
                 for (auto i : rv::iota(used_count) | rv::take(queue_count))
                 {
                     queues.push_back({.flags = ::vk::QueueFlagBits::eTransfer,
-                                      .family_index = family_index,
-                                      .queue_index = static_cast<size_t>(i)});
+                                      .family_index = static_cast<std::uint32_t>(family_index),
+                                      .queue_index = static_cast<std::uint32_t>(i)});
                 }
 
                 transfer_queue_counter -= queue_count;

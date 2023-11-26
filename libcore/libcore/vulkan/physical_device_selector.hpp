@@ -80,10 +80,11 @@ namespace core::vk
      * Example usage:
      * @code{.cpp}
      * auto device_result = core::vk::physical_device_selector{}
-     *     .set_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
-     *     .should_create_graphics_queue(true)
-     *     .should_create_transfer_queue(true)
-     *     .should_create_compute_queue(true)
+     *     .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
+     *     .allow_any_device_type(true)
+     *     .with_graphics_queues(3)
+     *     .with_transfer_queues(1)
+     *     .with_compute_queues(3)
      *     .select(instance);
      *
      * if (not device_result.has_value())
@@ -103,6 +104,12 @@ namespace core::vk
     public:
         physical_device_selector(std::span<const ::vk::PhysicalDevice> physical_devices);
 
+        /**
+         * @brief Enable logging for the selection process, this will give extra information about what is happening.
+         * @since 0.1.0
+         *
+         * @param[in] logger The logger to use.
+         */
         auto with_logger(spdlog::logger& logger) -> physical_device_selector&;
 
         /**

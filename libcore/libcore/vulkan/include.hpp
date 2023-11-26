@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <libcore/semantic_version.hpp>
+#include "libcore/semantic_version.hpp"
 
 #if !defined(VULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
 #    define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
@@ -50,6 +50,11 @@
 
 namespace core::vk
 {
+    namespace details
+    {
+        auto is_khr_validation_layer(::vk::LayerProperties const& property) -> bool;
+    } // namespace details
+
 #if defined(NDEBUG)
     static constexpr bool should_enable_validation_layers = false;
 #else
@@ -87,4 +92,10 @@ namespace core::vk
      * @since 0.1.0
      */
     auto make_error_code(::vk::Result error_code) -> std::error_code;
+
+    /**
+     * @brief Get the list of validation layers to enable for the vulkan instance.
+     */
+    [[nodiscard]]
+    auto get_desired_validation_layers() -> std::vector<char const*>;
 } // namespace core::vk

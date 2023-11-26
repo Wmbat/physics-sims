@@ -94,7 +94,8 @@ namespace
         return {.handle = device,
                 .properties = device.getProperties2(),
                 .memory_properties = device.getMemoryProperties(),
-                .queue_family_properties = device.getQueueFamilyProperties()};
+                .queue_family_properties = device.getQueueFamilyProperties(),
+                .features = device.getFeatures()};
     }
 } // namespace
 

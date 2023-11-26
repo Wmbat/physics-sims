@@ -16,20 +16,26 @@
 
 #include "libcore/vulkan/device_builder.hpp"
 #include "libcore/vulkan/device.hpp"
+#include "libcore/vulkan/include.hpp"
 #include "libcore/vulkan/physical_device.hpp"
 #include "libcore/vulkan/queue_properties.hpp"
 #include "libcore/vulkan/queue_selector.hpp"
 
 #include "libcore/error/error.hpp"
 
-#include "range/v3/view/subrange.hpp"
+#include "range/v3/algorithm/fold_left.hpp"
 #include "tl/expected.hpp"
 
 #include "range/v3/range/conversion.hpp"
+#include "range/v3/range/primitives.hpp"
 #include "range/v3/view/chunk_by.hpp"
+#include "range/v3/view/filter.hpp"
+#include "range/v3/view/remove_if.hpp"
+#include "range/v3/view/subrange.hpp"
 #include "range/v3/view/transform.hpp"
 
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 namespace rv = ranges::views;
@@ -38,12 +44,58 @@ namespace
 {
     struct queue_family_properties
     {
+        ::vk::DeviceQueueCreateFlags flags;
+
+        std::uint32_t queue_family_index;
+
+        std::uint32_t queue_count;
+
+        std::vector<float> queue_priorities;
     };
+
+    [[nodiscard]]
+    auto make_queue_family_properties(auto queue_families) -> queue_family_properties
+    {
+        auto beg = ranges::begin(queue_families);
+        auto queue_count = ranges::size(queue_families);
+
+        return {.flags = {},
+                .queue_family_index = beg->family_index,
+                .queue_count = static_cast<std::uint32_t>(queue_count),
+                .queue_priorities = std::vector<float>(queue_count, 1.0f)};
+    }
+
+    auto to_device_queue_properties(queue_family_properties const& properties)
+    {
+        return vk::DeviceQueueCreateInfo{}
+            .setFlags(properties.flags)
+            .setQueueFamilyIndex(properties.queue_family_index)
+            .setQueueCount(properties.queue_count)
+            .setQueuePriorities(properties.queue_priorities);
+    }
+
+    auto get_queues(::vk::Device device, std::span<core::vk::queue_properties const> queues, vk::QueueFlags flags)
+        -> std::vector<::vk::Queue>
+    {
+        return queues | rv::filter([=](core::vk::queue_properties const& property) {
+                   return property.flags == flags;
+               })
+             | rv::transform([=](core::vk::queue_properties const& property) {
+                   return device.getQueue(property.family_index, property.queue_index);
+               })
+             | ranges::to<std::vector>();
+    }
 } // namespace
 
 namespace core::vk
 {
     device_builder::device_builder(physical_device const& physical_device) : m_physical_device(&physical_device) {}
+
+    auto device_builder::with_logger(spdlog::logger& logger) -> device_builder&
+    {
+        m_logger = &logger;
+        return *this;
+    }
 
     auto device_builder::with_compute_queues(int desired_queue_count) -> device_builder&
     {
@@ -71,21 +123,29 @@ namespace core::vk
                                 .with_transfer_queues(m_transfer_queue_count)
                                 .select_from(m_physical_device->queue_family_properties);
 
-        auto const queues_by_family =
-            rv::chunk_by(queues,
-                         [](queue_properties const& lhs, queue_properties const& rhs) {
-                             return lhs.family_index == rhs.family_index and lhs.flags == rhs.flags;
-                         })
-            | rv::transform([](auto subrange) { return subrange | ranges::to<std::vector>(); })
+        auto compare_family_indices = [](queue_properties const& lhs, queue_properties const& rhs) {
+            return lhs.family_index == rhs.family_index;
+        };
+
+        // clang-format off
+
+        std::vector const queues_by_family = rv::chunk_by(queues, compare_family_indices)
+            | rv::remove_if([](auto subrange) { return ranges::empty(subrange); })
+            | rv::transform([](auto subrange) { return make_queue_family_properties(subrange); })
             | ranges::to<std::vector>();
 
-        auto test = queues_by_family | rv::transform([](auto subrange) {
-                return ::vk::DeviceQueueCreateInfo{};
-                    });
+        std::vector queue_family_properties = queues_by_family 
+            | rv::transform(to_device_queue_properties) 
+            | ranges::to<std::vector>();
 
-        std::vector<::vk::DeviceQueueCreateInfo> queue_create_infos;
+        // clang-format on
 
-        auto create_info = ::vk::DeviceCreateInfo{}.setQueueCreateInfos(queue_create_infos);
+        auto enabled_layers = get_desired_validation_layers();
+
+        auto create_info = ::vk::DeviceCreateInfo{}
+                               .setQueueCreateInfos(queue_family_properties)
+                               .setPEnabledLayerNames(enabled_layers)
+                               .setPEnabledFeatures(&(m_physical_device->features));
 
         auto [result, device] = m_physical_device->handle.createDeviceUnique(create_info);
         if (result != ::vk::Result::eSuccess)
@@ -93,6 +153,21 @@ namespace core::vk
             // ERROR
         }
 
-        return vk::device{};
+        auto graphics_queues = get_queues(device.get(), queues, ::vk::QueueFlagBits::eGraphics);
+        auto compute_queues = get_queues(device.get(), queues, ::vk::QueueFlagBits::eCompute);
+        auto transfer_queues = get_queues(device.get(), queues, ::vk::QueueFlagBits::eTransfer);
+
+        if (m_logger)
+        {
+            m_logger->info("Vulkan device has been created !");
+            m_logger->info("There are {0} graphics queues available", std::ssize(graphics_queues));
+            m_logger->info("There are {0} compute queues available", std::ssize(compute_queues));
+            m_logger->info("There are {0} transfer queues available", std::ssize(transfer_queues));
+        }
+
+        return vk::device{.handle = std::move(device),
+                          .graphics_queues = graphics_queues,
+                          .compute_queues = compute_queues,
+                          .transfer_queues = transfer_queues};
     }
 } // namespace core::vk

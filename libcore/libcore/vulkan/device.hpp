@@ -1,6 +1,6 @@
 /**
  * @file libcore/libcore/vulkan/device.hpp
- * @brief Represents the logical interface of a physical device.
+ * @brief
  * @copyright Copyright 2023 wmbat
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +18,16 @@
 
 #pragma once
 
+#include "libcore/vulkan/include.hpp"
+
 namespace core::vk
 {
     struct device
     {
+        ::vk::UniqueDevice handle;
+
+        std::vector<::vk::Queue> graphics_queues;
+        std::vector<::vk::Queue> compute_queues;
+        std::vector<::vk::Queue> transfer_queues;
     };
 } // namespace core::vk

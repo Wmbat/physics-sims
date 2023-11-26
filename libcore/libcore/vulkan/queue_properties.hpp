@@ -35,11 +35,11 @@ namespace core::vk
         /**
          * @brief The index of the queue family.
          */
-        std::size_t family_index;
+        std::uint32_t family_index;
 
         /**
          * @brief The index of the queue within the family.
          */
-        std::size_t queue_index;
+        std::uint32_t queue_index;
     };
 } // namespace core::vk
