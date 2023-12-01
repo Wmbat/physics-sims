@@ -59,6 +59,7 @@
 #include <string_view>
 #include <vector>
 #include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 using namespace std::literals::chrono_literals;
 
@@ -98,24 +99,23 @@ auto main(int argc, char* argv[]) -> int
         auto app_logger = create_logger(app_info.name);
 
         auto instance = core::vk::instance::make(app_info, app_logger);
-        if (!instance)
+        if (not instance)
         {
             app_logger.error("{}", instance.error());
             return EXIT_FAILURE;
         }
 
-        auto physical_device = instance->enumerate_physical_devices()
-            .and_then([&](std::vector<::vk::PhysicalDevice>&& devices) {
-                return core::vk::physical_device_selector{devices}
-                    .with_logger(app_logger)
-                    .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
-                    .allow_any_device_type(true)
-                    .with_graphics_queues(1)
-                    .with_compute_queues(1)
-                    .with_transfer_queues(1)
-                    .select();
-            });
-        if (!physical_device)
+        auto physical_device = instance->enumerate_physical_devices().and_then([&](auto&& devices) {
+            return core::vk::physical_device_selector{devices}
+                .with_logger(app_logger)
+                .with_prefered_device_type(::vk::PhysicalDeviceType::eDiscreteGpu)
+                .allow_any_device_type(true)
+                .with_graphics_queues(1)
+                .with_compute_queues(1)
+                .with_transfer_queues(1)
+                .select();
+        });
+        if (not physical_device)
         {
             app_logger.error("Failed to select a GPU because \"{}\"", physical_device.error());
             return EXIT_FAILURE;
@@ -129,11 +129,13 @@ auto main(int argc, char* argv[]) -> int
                           .with_compute_queues(1)
                           .with_transfer_queues(1)
                           .build();
-        if (!device)
+        if (not device)
         {
             app_logger.error("{}", device.error());
             return EXIT_FAILURE;
         }
+
+        auto test = vk::CommandPoolCreateInfo{};
 
         if (auto res = render::system::make(app_info, app_logger))
         {

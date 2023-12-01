@@ -33,12 +33,12 @@
 #include "range/v3/range/access.hpp"
 #include "range/v3/range/conversion.hpp"
 #include "range/v3/range/dangling.hpp"
-#include "range/v3/range_fwd.hpp"
 #include "range/v3/utility/common_type.hpp"
 #include "range/v3/view/all.hpp"
 #include "range/v3/view/enumerate.hpp"
 #include "range/v3/view/facade.hpp"
 #include "range/v3/view/filter.hpp"
+#include "range/v3/view/map.hpp"
 #include "range/v3/view/transform.hpp"
 #include "range/v3/view/view.hpp"
 #include "range/v3/view/zip.hpp"
@@ -163,7 +163,7 @@ namespace core::vk
 
     auto physical_device_selector::select() -> tl::expected<physical_device, core::error>
     {
-        using device_rating = std::pair<physical_device, int>;
+        using device_rating = std::pair<physical_device, std::int64_t>;
         using enum physical_device_selection_error;
 
         if (m_physical_devices.empty())
@@ -200,14 +200,14 @@ namespace core::vk
         return tl::unexpected{core::error{.error_code = make_error_code(no_suitable_physical_devices_found)}};
     }
 
-    auto physical_device_selector::rate_device(physical_device const& device) -> int
+    auto physical_device_selector::rate_device(physical_device const& device) -> std::int64_t
     {
         auto const& properties = device.properties.properties;
 
         return rate_device_type(properties.deviceType) + rate_device_queues(device.queue_family_properties);
     }
 
-    auto physical_device_selector::rate_device_type(::vk::PhysicalDeviceType type) -> int
+    auto physical_device_selector::rate_device_type(::vk::PhysicalDeviceType type) -> std::int64_t
     {
         using enum ::vk::PhysicalDeviceType;
 
@@ -249,7 +249,7 @@ namespace core::vk
     }
 
     auto physical_device_selector::rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families)
-        -> int
+        -> std::int64_t
     {
         auto const queues = queue_selector{}
                                 .with_graphics_queues(m_graphics_queue_count)
@@ -257,6 +257,9 @@ namespace core::vk
                                 .with_transfer_queues(m_transfer_queue_count)
                                 .select_from(queue_families);
 
-        return static_cast<int>(ranges::size(queues));
+        return ranges::fold_left(queues | rv::values | rv::transform([](std::vector<::vk::QueueFlags> const& queues) {
+                                     return std::ssize(queues);
+                                 }),
+                                 0, std::plus{});
     }
 } // namespace core::vk

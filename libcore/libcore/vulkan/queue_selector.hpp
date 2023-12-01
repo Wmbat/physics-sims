@@ -23,15 +23,31 @@
 #include <vulkan/vulkan_structs.hpp>
 
 #include <span>
+#include <unordered_map>
+
+namespace spdlog
+{
+    class logger;
+}
 
 namespace core::vk
 {
+    using queue_family_map = std::unordered_map<std::size_t, std::vector<::vk::QueueFlags>>;
+
     /**
      * @brief Tries to select the best queues based on their purpose from a list of available queues.
      */
     struct queue_selector
     {
     public:
+        /**
+         * @brief Enable logging for the selection process, this will give extra information about what is happening.
+         * @since 0.1.0
+         *
+         * @param[in] logger The logger to use.
+         */
+        auto with_logger(spdlog::logger& logger) -> queue_selector&;
+
         /**
          * @brief Specify the amount of compute queues to find.
          * @warning There may not be the correct amount of queue if no device supports the amount requested.
@@ -43,6 +59,7 @@ namespace core::vk
          * @param[in] desired_queue_count The number of compute queues that should be created.
          */
         auto with_compute_queues(int desired_queue_count = 1) -> queue_selector&;
+
         /**
          * @brief Specify the amount of compute queues to find.
          * @warning There may not be the correct amount of queue if no device supports the amount requested.
@@ -54,6 +71,7 @@ namespace core::vk
          * @param[in] desired_queue_count The number of graphics queues that should be created.
          */
         auto with_graphics_queues(int desired_queue_count = 1) -> queue_selector&;
+
         /**
          * @brief Specity whether the selection should try to find transfer queues, and set the amount of compute
          * queues to create.
@@ -71,9 +89,11 @@ namespace core::vk
          * @brief Selects the queues.
          * @since 0.1.0
          */
-        auto select_from(std::span<const ::vk::QueueFamilyProperties> queue_families) -> std::vector<queue_properties>;
+        auto select_from(std::span<const ::vk::QueueFamilyProperties> queue_families) -> queue_family_map;
 
     private:
+        spdlog::logger* m_logger = nullptr;
+
         int m_compute_queue_count = 0;
         int m_graphics_queue_count = 1;
         int m_transfer_queue_count = 1;

@@ -1,5 +1,5 @@
 /**
- * @file libcore/libcore/vulkan/device.hpp
+ * @file libcore/libcore/vulkan/queue_family.hpp
  * @brief
  * @copyright Copyright 2023 wmbat
  *
@@ -18,15 +18,17 @@
 
 #pragma once
 
-#include "libcore/vulkan/include.hpp"
-#include "libcore/vulkan/queue_family.hpp"
+#include "libcore/vulkan/queue.hpp"
+
+#include <cstdint>
+#include <vector>
 
 namespace core::vk
 {
-    struct device
+    struct queue_family
     {
-        ::vk::UniqueDevice handle;
+        std::uint32_t index = 0;
 
-        std::vector<queue_family> queue_families;
+        std::vector<queue> queues = {};
     };
 } // namespace core::vk

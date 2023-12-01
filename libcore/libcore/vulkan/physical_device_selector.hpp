@@ -25,6 +25,7 @@
 #include "spdlog/logger.h"
 #include "tl/expected.hpp"
 
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -191,9 +192,9 @@ namespace core::vk
         auto select() -> tl::expected<physical_device, core::error>;
 
     private:
-        auto rate_device(physical_device const& device) -> int;
-        auto rate_device_type(::vk::PhysicalDeviceType type) -> int;
-        auto rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families) -> int;
+        auto rate_device(physical_device const& device) -> std::int64_t;
+        auto rate_device_type(::vk::PhysicalDeviceType type) -> std::int64_t;
+        auto rate_device_queues(std::span<::vk::QueueFamilyProperties const> queue_families) -> std::int64_t;
 
     private:
         spdlog::logger* m_logger = nullptr;
